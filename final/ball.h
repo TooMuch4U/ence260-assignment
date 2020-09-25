@@ -6,6 +6,7 @@
 //TODO: Docstring tihs
 
 #ifndef BALL_H
+#include "system.h"
 #define BALL_H
 
 #define LEFT_WALL 0
@@ -19,8 +20,10 @@
 #define UP 1
 #define DOWN -1
 
+#define HEIGHT 5
 
-typedef struct ball_s Ball
+
+typedef struct ball_s Ball;
 
 struct ball_s {
     //TODO : need uint8?
@@ -28,18 +31,18 @@ struct ball_s {
     int y;
     int direction_x; //-1 for left, 0 for straight, 1 for right
     int direction_y; //1 for up, -1 for down
-}
+};
 
 
 void update_location(Ball ball, int paddle);
 
-void update_x(Ball ball);
+void update_x(Ball ball, int paddle);
 
 void update_y (Ball ball, int paddle);
 
 int has_hit_paddle (Ball ball, int paddle);
 
-void get_bitmap(uint8_t* bitmap, size_t len, Ball ball);
+void get_bitmap(uint8_t bitmap[], Ball ball);
 
 int has_hit_ground(Ball ball);
 
