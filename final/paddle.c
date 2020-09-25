@@ -22,17 +22,6 @@ void paddle_init() {
  * Checks for movement of navswitch, moves paddle accordingly
  */
 void paddle_move_check() {
-/**
- * Initialise paddle
- */
-void paddle_init() {
-    PADDLE_INSTANCE = {PADDLE_START_POS};
-}
-
-/**
- * Checks for movement of navswitch, moves paddle accordingly
- */
-void paddle_move_check() {
 
     // Check for a left push
     if (navswitch_push_event_p(NAVSWITCH_EAST)) {
