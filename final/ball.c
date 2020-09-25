@@ -79,6 +79,17 @@ int has_hit_paddle (Ball ball, int paddle)
     return 0;
 }
 
+void get_bitmap(uint8_t* bitmap, size_t len, Ball ball)
+{
+    for (int i = 0; i < len; i++) {
+        if (i != ball.y) {
+            bitmap[i] = 0x00;
+        } else {
+            bitmap[i] = 1 << (RIGHT_WALL - ball.x);
+        }
+    }
+}
+
 int has_hit_ground(Ball ball)
 {
     return ball.y == GROUND && ball.direction_y == DOWN;
@@ -88,4 +99,5 @@ int is_game_over(Ball ball)
 {
     return has_hit_ground(ball);
 }
+
 
