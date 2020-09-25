@@ -1,23 +1,9 @@
-#DEFINE LEFT_WALL 0
-#DEFINE RIGHT_WALL 6
-#DEFINE GROUND 0
+//
+// Created by Emma Hogan on 26/09/20.
+// Last edited by Emma Hogan on 26/09/20
+//
 
-//TODO : check if signed stuff is ok
-#DEFINE LEFT -1
-#DEFINE STRAIGHT 0
-#DEFINE RIGHT 1
-#DEFINE UP 1
-#DEFINE DOWN -1
-
-typedef struct ball_s Ball
-
-struct ball_s {
-    //TODO : need uint8?
-    int x;
-    int y;
-    int direction_x; //-1 for left, 0 for straight, 1 for right
-    int direction_y; //1 for up, -1 for down
-}
+#include "ball.h"
 
 void update_location(Ball ball, int paddle)
 {
