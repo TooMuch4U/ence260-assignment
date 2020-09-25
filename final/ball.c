@@ -2,6 +2,7 @@
 #DEFINE RIGHT_WALL 6
 #DEFINE GROUND 0
 
+//TODO : check if signed stuff is ok
 #DEFINE LEFT -1
 #DEFINE STRAIGHT 0
 #DEFINE RIGHT 1
@@ -11,6 +12,7 @@
 typedef struct ball_s Ball
 
 struct ball_s {
+    //TODO : need uint8?
     int x;
     int y;
     int direction_x; //-1 for left, 0 for straight, 1 for right
