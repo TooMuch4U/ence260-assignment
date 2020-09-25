@@ -8,8 +8,8 @@
 #include "navswitch.h"
 
 #define PADDLE_WIDTH 3
-#define PADDLE_LEFT_LIMIT 1
-#define PADDLE_RIGHT_LIMIT 4
+#define PADDLE_LEFT_LIMIT 0
+#define PADDLE_RIGHT_LIMIT 6
 #define PADDLE_START_POS 2
 
 // Paddle instance
