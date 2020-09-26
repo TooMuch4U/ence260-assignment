@@ -51,14 +51,14 @@ int main (void)
         pio_config_set(rows[i], PIO_OUTPUT_HIGH);
     }
 
-    Ball ball = {3,4,0,1};
+    Ball ball = {3,4,-1,-1};
     uint8_t bitmap[5] = {0};
     get_bitmap(bitmap, ball);
 
 
     while (1)
     {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 200; i++) {
             pacer_wait ();
 
             display_column (bitmap[current_column], current_column);
@@ -69,5 +69,7 @@ int main (void)
                 current_column = 0;
             }
         }
+        update_location(&ball, 3);
+        get_bitmap(bitmap, ball);
     }
 }
