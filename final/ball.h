@@ -34,18 +34,18 @@ struct ball_s {
 };
 
 
-void update_location(Ball ball, int paddle);
+void update_location(Ball* ball, int paddle);
 
-void update_x(Ball ball, int paddle);
+void update_x(Ball* ball, int paddle);
 
-void update_y (Ball ball, int paddle);
+void update_y (Ball* ball, int paddle);
 
-int has_hit_paddle (Ball ball, int paddle);
+int has_hit_paddle (Ball* ball, int paddle);
 
 void get_bitmap(uint8_t bitmap[], Ball ball);
 
-int has_hit_ground(Ball ball);
+int has_hit_ground(Ball* ball);
 
-int is_game_over(Ball ball);
+int is_game_over(Ball* ball);
 
 #endif
