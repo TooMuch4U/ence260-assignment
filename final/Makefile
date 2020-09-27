@@ -40,10 +40,12 @@ ball.o: ball.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ball.h
 paddle.o: paddle.c ../../drivers/navswitch.h paddle.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
+coder.o: coder.c coder.h
+
 
 
 # Link: create ELF output file from object files.
-game.out: game.o system.o navswitch.o pio.o timer.o pacer.o ball.o paddle.o
+game.out: game.o system.o navswitch.o pio.o timer.o pacer.o ball.o paddle.o coder.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 
