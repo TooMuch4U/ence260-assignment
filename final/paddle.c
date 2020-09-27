@@ -4,36 +4,32 @@
 
 #include "paddle.h"
 
-/**
- * Structure for paddle
- */
-typedef struct {
-    uint8_t pos;
-} Paddle;
+// Paddle instance
+static Paddle PADDLE_INSTANCE;
 
 /**
  * Initialise paddle
  */
 void paddle_init()
 {
-    PADDLE_INSTANCE = {PADDLE_START_POS};
+    PADDLE_INSTANCE.pos = PADDLE_START_POS;
 }
 
 /**
  * Returns a bitmap of the current paddle position
  */
-int get_paddle_bitmap(uint8_t* bitmap)
+void get_paddle_bitmap(uint8_t* bitmap)
 {
-    bitmap[4] = (1 << (6-PADDLE_INSTANCE.pos));
+    bitmap[4] |= (1 << (6-PADDLE_INSTANCE.pos));
 
     // Check if it's at the left side of the screen
     if (PADDLE_INSTANCE.pos > 0) {
-        bitmap[4] &= (1 << (7-PADDLE_INSTANCE.pos));
+        bitmap[4] |= (1 << (7-PADDLE_INSTANCE.pos));
     }
 
     // Check if it's at the right side of the screen
     if (PADDLE_INSTANCE.pos < 6) {
-        bitmap[4] &= (1 << (5-PADDLE_INSTANCE.pos));
+        bitmap[4] |= (1 << (5-PADDLE_INSTANCE.pos));
     }
 }
 
