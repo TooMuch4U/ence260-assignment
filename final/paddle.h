@@ -16,10 +16,10 @@ typedef struct {
     uint8_t pos;
 } Paddle;
 
-void paddle_init();
-void paddle_move_check();
-void paddle_move_left();
-void paddle_move_right();
+void paddle_init(void);
+void paddle_move_check(void);
+void paddle_move_left(void);
+void paddle_move_right(void);
 void get_paddle_bitmap(uint8_t* bitmap);
 
 #endif //ASSIGMENT_PADDLE_H

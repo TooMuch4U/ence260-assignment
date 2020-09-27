@@ -10,7 +10,7 @@ static Paddle PADDLE_INSTANCE;
 /**
  * Initialise paddle
  */
-void paddle_init()
+void paddle_init(void)
 {
     PADDLE_INSTANCE.pos = PADDLE_START_POS;
 }
@@ -36,7 +36,7 @@ void get_paddle_bitmap(uint8_t* bitmap)
 /**
  * Checks for movement of navswitch, moves paddle accordingly
  */
-void paddle_move_check()
+void paddle_move_check(void)
 {
 
     // Check for a left push
@@ -54,7 +54,7 @@ void paddle_move_check()
  * Move the paddle to the left once.
  * Will only move if the paddle isn't already at the limit
  */
-void paddle_move_left()
+void paddle_move_left(void)
 {
     // Check that the paddle isn't at the far limit yet
     if (PADDLE_INSTANCE.pos > PADDLE_LEFT_LIMIT) {
@@ -66,7 +66,7 @@ void paddle_move_left()
  * Moves the paddle once to the right.
  * Only moves the paddle if the paddle isn't already at the right limit
  */
-void paddle_move_right()
+void paddle_move_right(void)
 {
     // Check the paddle isn't at the right limit
     if (PADDLE_INSTANCE.pos < PADDLE_RIGHT_LIMIT) {
