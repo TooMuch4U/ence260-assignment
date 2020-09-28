@@ -21,5 +21,6 @@ void paddle_move_check(void);
 void paddle_move_left(void);
 void paddle_move_right(void);
 void get_paddle_bitmap(uint8_t* bitmap);
+uint8_t get_paddle_location(void);
 
 #endif //ASSIGMENT_PADDLE_H

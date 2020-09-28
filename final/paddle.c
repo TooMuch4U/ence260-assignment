@@ -11,7 +11,7 @@ static Paddle PADDLE_INSTANCE;
  * Returns the paddles current position
  * @return int of paddle position
  */
-uint8_t get_paddle_location() {
+uint8_t get_paddle_location(void) {
     return PADDLE_INSTANCE.pos;
 };
 
