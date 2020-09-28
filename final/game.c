@@ -96,8 +96,5 @@ int main (void)
             update_location(&ball, get_paddle_location());
             get_bitmap(bitmap, ball);
         }
-
-
-
     }
 }

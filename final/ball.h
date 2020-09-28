@@ -6,8 +6,9 @@
 //TODO: Docstring tihs
 
 #ifndef BALL_H
-#include "system.h"
 #define BALL_H
+
+#include "system.h"
 
 #define LEFT_WALL 0
 #define RIGHT_WALL 6

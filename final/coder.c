@@ -40,6 +40,8 @@
 
 /* Multiplication table over F_4 indexed by decimal representation of element. eg x^2 * x = mutliplication_table[3][2]
  * (or [2][3]) technically as multiplication is commutative*/
+
+
 int multiplication_table[CODE_LENGTH][CODE_LENGTH] = {
     {0,0,0,0},
     {0,1,2,3},
