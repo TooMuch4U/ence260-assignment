@@ -11,7 +11,7 @@ static Paddle PADDLE_INSTANCE;
  * Returns the paddles current position
  * @return int of paddle position
  */
-uint8_t get_paddle_location() {
+uint8_t get_paddle_location(void) {
     return PADDLE_INSTANCE.pos;
 };
 
@@ -28,6 +28,7 @@ void paddle_init(void)
  */
 void get_paddle_bitmap(uint8_t* bitmap)
 {
+    bitmap[4] = 0;
     bitmap[4] |= (1 << (6-PADDLE_INSTANCE.pos));
 
     // Check if it's at the left side of the screen
@@ -46,14 +47,14 @@ void get_paddle_bitmap(uint8_t* bitmap)
  */
 void paddle_move_check(void)
 {
-
+    navswitch_update();
     // Check for a left push
-    if (navswitch_push_event_p(NAVSWITCH_EAST)) {
+    if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
         paddle_move_left();
     }
 
     // Check for a right push
-    if (navswitch_push_event_p(NAVSWITCH_WEST)) {
+    if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
         paddle_move_right();
     }
 }
