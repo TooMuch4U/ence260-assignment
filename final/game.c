@@ -2,6 +2,7 @@
 #include "pio.h"
 #include "pacer.h"
 #include "ball.h"
+#include "coder.h"
 
 #define HEIGHT 5
 
