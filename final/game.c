@@ -3,6 +3,7 @@
 #include "pacer.h"
 #include "ball.h"
 #include "coder.h"
+#include "paddle.h"
 
 #define HEIGHT 5
 
@@ -54,7 +55,9 @@ int main (void)
 
     Ball ball = {3,4,-1,-1};
     uint8_t bitmap[5] = {0};
+    paddle_init();
     get_bitmap(bitmap, ball);
+    get_paddle_bitmap(bitmap);
 
 
     while (1)
@@ -69,8 +72,11 @@ int main (void)
             if (current_column > (LEDMAT_COLS_NUM - 1)) {
                 current_column = 0;
             }
+
+
         }
-        update_location(&ball, 3);
+        update_location(&ball, 1);
         get_bitmap(bitmap, ball);
+        get_paddle_bitmap(bitmap);
     }
 }
