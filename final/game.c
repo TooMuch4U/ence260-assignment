@@ -4,6 +4,7 @@
 #include "ball.h"
 #include "coder.h"
 #include "paddle.h"
+#include "navswitch.h"
 
 #define HEIGHT 5
 
@@ -44,6 +45,7 @@ int main (void)
     system_init ();
     uint8_t current_column = 0;
     pacer_init(500);
+    navswitch_init();
 
     /* Initialise LED matrix pins.  */
     for (int i = 0; i < 5; i++) {
@@ -59,24 +61,43 @@ int main (void)
     get_bitmap(bitmap, ball);
     get_paddle_bitmap(bitmap);
 
+    uint8_t updateBallCount = 0;
 
     while (1)
     {
-        for (int i = 0; i < 200; i++) {
-            pacer_wait ();
+        pacer_wait ();
 
-            display_column (bitmap[current_column], current_column);
-
-            current_column++;
-
-            if (current_column > (LEDMAT_COLS_NUM - 1)) {
-                current_column = 0;
-            }
-
-
+        // Check for navswitch presses
+        navswitch_update();
+        // Check for a left push
+        if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
+            paddle_move_left();
         }
-        update_location(&ball, 1);
-        get_bitmap(bitmap, ball);
+
+        // Check for a right push
+        if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
+            paddle_move_right();
+        }
+
+        // Update the paddle on display
         get_paddle_bitmap(bitmap);
+        display_column (bitmap[current_column], current_column);
+
+        // Update column
+        current_column++;
+        if (current_column > (LEDMAT_COLS_NUM - 1)) {
+            current_column = 0;
+        }
+
+        // Update ball direction
+        updateBallCount++;
+        if (updateBallCount > 200) {
+            updateBallCount = 0;
+            update_location(&ball, get_paddle_location());
+            get_bitmap(bitmap, ball);
+        }
+
+
+
     }
 }
