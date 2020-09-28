@@ -36,9 +36,9 @@ struct ball_s {
 
 void update_location(Ball* ball, int paddle);
 
-void update_x(Ball* ball, int paddle);
+void update_x(Ball* ball, int hit_paddle, int paddle);
 
-void update_y (Ball* ball, int paddle);
+void update_y (Ball* ball, int hit_paddle);
 
 int has_hit_paddle (Ball* ball, int paddle);
 

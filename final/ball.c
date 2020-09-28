@@ -7,11 +7,12 @@
 
 void update_location(Ball* ball, int paddle)
 {
-    update_x(ball, paddle);
-    update_y(ball, paddle);
+    int hit_paddle = has_hit_paddle(ball, paddle);
+    update_x(ball, hit_paddle, paddle);
+    update_y(ball, hit_paddle);
 }
 
-void update_x(Ball* ball, int paddle)
+void update_x(Ball* ball, int hit_paddle, int paddle)
 {
     if (ball->x == LEFT_WALL && ball->direction_x == LEFT) {
         //hit the left wall
@@ -21,18 +22,19 @@ void update_x(Ball* ball, int paddle)
         //hit the right wall
         ball->direction_x = LEFT;
         ball->x--;
-    } else if (has_hit_paddle (ball, paddle)) {
-        if (ball->x == paddle - 1 && ball->direction_x != LEFT) {
-            //hit left side of paddle - change direction to be more lefty
+    } else if (hit_paddle) {
+        ball->direction_x = 0;
+        if (ball->x == paddle - 1) {
+            //hit left side of paddle - bounce off left
             ball->x--;
-            ball->direction_x--;
-        } else if (ball->x == paddle + 1 && ball->direction_x != RIGHT) {
-            //hit right side of paddle - change direction to be more righty
-            ball->x++;
-            ball->direction_x++;
-        } else {
-            //hit paddle but no need to change direction
+            ball->direction_x = LEFT;
+        } else if (ball->x == paddle) {
+            //no change to ball direction
             ball->x += ball->direction_x;
+        } else {
+            //ball hit right side of paddle - bounce off right
+            ball->x++;
+            ball->direction_x = RIGHT;
         }
     } else {
         //continue moving in same direction
@@ -40,15 +42,16 @@ void update_x(Ball* ball, int paddle)
     }
 }
 
-void update_y (Ball* ball, int paddle)
+void update_y (Ball* ball, int hit_paddle)
 {
     if (has_hit_ground(ball)) {
         //lost the game
-    } else if (has_hit_paddle(ball, paddle)) {
+        //for now
+        ball->direction_y = UP;
+    } else if (hit_paddle) {
         //ball hit the paddle
         ball->y++;
         ball->direction_y = UP;
-        ball->direction_x *= -1;
     } else {
         //continue in same direction
         ball->y += ball->direction_y;
