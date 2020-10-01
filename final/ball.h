@@ -13,6 +13,7 @@
 #define LEFT_WALL 0
 #define RIGHT_WALL 6
 #define GROUND 0
+#define HEIGHT 5
 
 //TODO : check if signed stuff is ok
 #define LEFT -1
@@ -21,7 +22,7 @@
 #define UP 1
 #define DOWN -1
 
-#define HEIGHT 5
+
 
 
 typedef struct ball_s Ball;
@@ -32,6 +33,7 @@ struct ball_s {
     int y;
     int direction_x; //-1 for left, 0 for straight, 1 for right
     int direction_y; //1 for up, -1 for down
+    int on_screen; //1 if on screen, 0 if on opponent's screen
 };
 
 
@@ -44,6 +46,8 @@ void update_y (Ball* ball, int hit_paddle);
 int has_hit_paddle (Ball* ball, int paddle);
 
 void get_bitmap(uint8_t bitmap[], Ball ball);
+
+int has_gone_off_screen (Ball* ball);
 
 int has_hit_ground(Ball* ball);
 

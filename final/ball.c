@@ -10,6 +10,9 @@ void update_location(Ball* ball, int paddle)
     int hit_paddle = has_hit_paddle(ball, paddle);
     update_x(ball, hit_paddle, paddle);
     update_y(ball, hit_paddle);
+    if (has_gone_off_screen(ball)) {
+        ball->on_screen = 0;
+    }
 }
 
 void update_x(Ball* ball, int hit_paddle, int paddle)
@@ -68,11 +71,10 @@ int has_hit_paddle (Ball* ball, int paddle)
     return 0;
 }
 
-static const uint8_t bitmap1[] =
+int has_gone_off_screen (Ball* ball)
 {
-    0x63, 0x5D, 0x27, 0x1D, 0x03
-};
-
+    return ball->y >= HEIGHT;
+}
 
 void get_bitmap(uint8_t bitmap[], Ball ball)
 {
