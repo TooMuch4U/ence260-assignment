@@ -5,8 +5,11 @@
 #include "coder.h"
 #include "paddle.h"
 #include "navswitch.h"
+#include "ir_uart.h"
 
 #define HEIGHT 5
+#define COORD_OFFSET 1
+#define DIR_OFFSET 2
 
 /** Define PIO pins driving LED matrix rows.  */
 static const pio_t rows[] =
@@ -39,6 +42,45 @@ static void display_column (uint8_t row_pattern, uint8_t current_column)
     pio_output_low(cols[current_column]);
 }
 
+static void transmit_ball (Ball* ball)
+{
+    // note that x direction and coord must mirror current direction and coord because fun kits are facing eachother
+    int x_coord = RIGHT_WALL - ball->x;
+    int x_dir = -1 * ball->direction_x; 
+    
+    // enforce encodings to be strictly positive
+    int encoded_x_coord = encode(x_coord + COORD_OFFSET);
+    int encoded_x_dir = encode(x_dir + DIR_OFFSET);
+    
+    ir_uart_putc(encoded_x_coord);
+    ir_uart_putc(encoded_x_dir);
+}
+
+static void receive_ball (Ball* ball)
+{
+    int encoded_x_coord;
+    int encoded_x_dir;
+    if (ir_uart_read_ready_p()) {
+	    encoded_x_coord = ir_uart_getc();
+        int x_coord = decode(encoded_x_coord) - COORD_OFFSET;
+        if (x_coord >= LEFT_WALL && x_coord <= RIGHT_WALL) { //we are receiving a transmission, not noise
+            encoded_x_dir = ir_uart_getc();
+            int x_dir = decode(encoded_x_dir) - DIR_OFFSET;
+            
+            ball->x = x_coord;
+            ball->direction_x = x_dir;
+            
+            //init y values
+            ball->y = HEIGHT - 1;
+            ball->direction_y = DOWN;
+            
+            //set to on screen
+            ball->on_screen = 1;
+        }
+    }
+}
+    
+
 
 int main (void)
 {
@@ -46,6 +88,7 @@ int main (void)
     uint8_t current_column = 0;
     pacer_init(500);
     navswitch_init();
+    ir_uart_init();
 
     /* Initialise LED matrix pins.  */
     for (int i = 0; i < 5; i++) {
@@ -55,7 +98,10 @@ int main (void)
         pio_config_set(rows[i], PIO_OUTPUT_HIGH);
     }
 
-    Ball ball = {3,4,-1,-1};
+    //set to x2 = 5 and x5 = 0 for funkit with ball starting offscreen
+    //set to x2 < 5 and x5 = 1 for funkit with ball starting onscreen
+    //eventually this will be determined by who starts the game
+    Ball ball = {3,4,0,-1,1};
     uint8_t bitmap[5] = {0};
     paddle_init();
     get_bitmap(bitmap, ball);
@@ -89,12 +135,29 @@ int main (void)
             current_column = 0;
         }
 
-        // Update ball direction
+        
         updateBallCount++;
-        if (updateBallCount > 200) {
-            updateBallCount = 0;
-            update_location(&ball, get_paddle_location());
-            get_bitmap(bitmap, ball);
+        //if the ball is on screen and the timer is right, update location
+        if (ball.on_screen) {
+            if (updateBallCount > 200) {
+                updateBallCount = 0;
+                update_location(&ball, get_paddle_location());
+                get_bitmap(bitmap, ball);
+                
+                if (!ball.on_screen) {
+                    //if ball just moved off screen, transmit relevant info
+                    transmit_ball(&ball);
+                }
+            }
+        }
+        else {
+            //listen constantly for transmissions while the ball is offscreen
+            receive_ball(&ball);
+            if (ball.on_screen) {
+                //reset ball timer
+                updateBallCount = 0;
+                get_bitmap(bitmap, ball);
+            }
         }
     }
 }
