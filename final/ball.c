@@ -5,9 +5,9 @@
 
 #include "ball.h"
 
-void update_location(Ball* ball, int paddle)
+void update_location(Ball* ball, uint8_t paddle)
 {
-    int hit_paddle = has_hit_paddle(ball, paddle);
+    uint8_t hit_paddle = has_hit_paddle(ball, paddle);
     update_x(ball, hit_paddle, paddle);
     update_y(ball, hit_paddle);
     if (has_gone_off_screen(ball)) {
@@ -15,7 +15,7 @@ void update_location(Ball* ball, int paddle)
     }
 }
 
-void update_x(Ball* ball, int hit_paddle, int paddle)
+void update_x(Ball* ball, uint8_t hit_paddle, uint8_t paddle)
 {
     if (ball->x == LEFT_WALL && ball->direction_x == LEFT) {
         //hit the left wall
@@ -45,7 +45,7 @@ void update_x(Ball* ball, int hit_paddle, int paddle)
     }
 }
 
-void update_y (Ball* ball, int hit_paddle)
+void update_y (Ball* ball, uint8_t hit_paddle)
 {
     if (has_hit_ground(ball)) {
         //lost the game
@@ -61,7 +61,7 @@ void update_y (Ball* ball, int hit_paddle)
     }
 }
 
-int has_hit_paddle (Ball* ball, int paddle)
+uint8_t has_hit_paddle (Ball* ball, uint8_t paddle)
 {
     if (ball->y == GROUND + 1 && ball->direction_y == DOWN) {
         if (ball->x == paddle || ball->x - 1 == paddle || ball->x + 1 == paddle) {
@@ -71,14 +71,14 @@ int has_hit_paddle (Ball* ball, int paddle)
     return 0;
 }
 
-int has_gone_off_screen (Ball* ball)
+uint8_t has_gone_off_screen (Ball* ball)
 {
     return ball->y >= HEIGHT;
 }
 
 void get_bitmap(uint8_t bitmap[], Ball ball)
 {
-    for (int i = 0; i < HEIGHT; i++) {
+    for (uint8_t i = 0; i < HEIGHT; i++) {
         if (i != (HEIGHT - 1 - ball.y)) {
             bitmap[i] = 0x00;
         } else {
@@ -87,12 +87,12 @@ void get_bitmap(uint8_t bitmap[], Ball ball)
     }
 }
 
-int has_hit_ground(Ball* ball)
+uint8_t has_hit_ground(Ball* ball)
 {
     return ball->y == GROUND && ball->direction_y == DOWN;
 }
 
-int is_game_over(Ball* ball)
+uint8_t is_game_over(Ball* ball)
 {
     return has_hit_ground(ball);
 }

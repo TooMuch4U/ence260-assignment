@@ -1,6 +1,6 @@
 //
 // Created by Emma Hogan on 26/09/20.
-// Last edited by Emma Hogan on 26/09/20
+// Last edited by Emma Hogan on 05/10/20
 //
 
 //TODO: Docstring tihs
@@ -15,7 +15,6 @@
 #define GROUND 0
 #define HEIGHT 5
 
-//TODO : check if signed stuff is ok
 #define LEFT -1
 #define STRAIGHT 0
 #define RIGHT 1
@@ -28,29 +27,28 @@
 typedef struct ball_s Ball;
 
 struct ball_s {
-    //TODO : need uint8?
-    int x;
-    int y;
-    int direction_x; //-1 for left, 0 for straight, 1 for right
-    int direction_y; //1 for up, -1 for down
-    int on_screen; //1 if on screen, 0 if on opponent's screen
+    uint8_t x;
+    uint8_t y;
+    int8_t direction_x; //-1 for left, 0 for straight, 1 for right
+    int8_t direction_y; //1 for up, -1 for down
+    uint8_t on_screen; //1 if on screen, 0 if on opponent's screen
 };
 
 
-void update_location(Ball* ball, int paddle);
+void update_location(Ball* ball, uint8_t paddle);
 
-void update_x(Ball* ball, int hit_paddle, int paddle);
+void update_x(Ball* ball, uint8_t hit_paddle, uint8_t paddle);
 
-void update_y (Ball* ball, int hit_paddle);
+void update_y (Ball* ball, uint8_t hit_paddle);
 
-int has_hit_paddle (Ball* ball, int paddle);
+uint8_t has_hit_paddle (Ball* ball, uint8_t paddle);
 
 void get_bitmap(uint8_t bitmap[], Ball ball);
 
-int has_gone_off_screen (Ball* ball);
+uint8_t has_gone_off_screen (Ball* ball);
 
-int has_hit_ground(Ball* ball);
+uint8_t has_hit_ground(Ball* ball);
 
-int is_game_over(Ball* ball);
+uint8_t is_game_over(Ball* ball);
 
 #endif
