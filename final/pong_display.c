@@ -2,7 +2,7 @@
 // Created by tcr59 on 26/09/20.
 //
 
-#include "display.h"
+#include "pong_display.h"
 
 /** Define PIO pins driving LED matrix rows.  */
 static const pio_t rows[] =
