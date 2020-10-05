@@ -112,7 +112,7 @@ int main (void)
     //set to x2 < 5 and x5 = 1 for funkit with ball starting onscreen
     //eventually this will be determined by who starts the game
     paddle_init();
-    Ball ball = {PADDLE_START_POS,1,0,-1,1};
+    Ball ball = {PADDLE_START_POS,5,0,-1,0};
     uint8_t bitmap[5] = {0};
     get_bitmap(bitmap, ball);
     get_paddle_bitmap(bitmap);
@@ -123,6 +123,7 @@ int main (void)
     {
         pacer_wait ();
 
+        // Playing Game
         if (game_state == 2) {
             // Check for navswitch presses
             navswitch_update();
@@ -172,19 +173,33 @@ int main (void)
             }
         }
 
+        // Scrolling text screen
         if (game_state == 0) {
             tinygl_update();
             // Check for navswitch presses
             navswitch_update();
+
             // Check for a push
             if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
+                game_state = 2;
+                transmit_ball(&ball);
+            }
+
+            // Check if the other fun kit pressed start
+            uint8_t before_screen = ball.on_screen;
+            receive_ball(&ball);
+            if (ball.on_screen != before_screen) {
                 game_state = 1;
+                ball.y = 1;
             }
         }
 
+        // Start screen
         if (game_state == 1) {
+
             // Check for navswitch presses
             navswitch_update();
+
             // Check for a left push
             if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
                 paddle_move_left();
@@ -200,12 +215,9 @@ int main (void)
                 game_state = 2;
             }
 
-            updateBallCount++;
-            //if the ball is on screen and the timer is right, update location
-            if (ball.on_screen) {
-                ball.x = get_paddle_location();
-                get_bitmap(bitmap, ball);
-            }
+            // update ball location
+            ball.x = get_paddle_location();
+            get_bitmap(bitmap, ball);
 
             // Update the paddle on display
             get_paddle_bitmap(bitmap);
