@@ -60,6 +60,12 @@ static void transmit_ball (Ball* ball)
     ir_uart_putc(encoded_x_dir);
 }
 
+static void inform_start (uint8_t mode)
+{
+    uint8_t val = encode(mode);
+    ir_uart_putc(val);
+}
+
 static void receive_ball (Ball* ball)
 {
     int encoded_x_coord;
@@ -84,20 +90,113 @@ static void receive_ball (Ball* ball)
     }
 }
 
+
+static void run_start_menu (void)
+{
+    // scroll the start of game text until one player starts paddle screen
+    uint8_t display_mode = 0;
+    while (!display_mode) {
+        pacer_wait ();
+        tinygl_update();
+        // Check for navswitch presses
+        navswitch_update();
+
+        // Check for a push
+        if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
+            display_mode = 1;
+            inform_start(1); //tell other controller a game has been started
+        }
+        // Check if the other fun kit pressed start
+        if (ir_uart_read_ready_p()) {
+            uint8_t val = ir_uart_getc();
+            uint8_t decoded_val = decode(val);
+            if (decoded_val == 1) { //we are receiving a transmission, not noise
+                display_mode = 1;
+            }
+        }
+    }
+}
+
+static void move_paddle (void)
+{
+    // Check for navswitch presses
+    navswitch_update();
+
+    //Check for a left push
+    if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
+        paddle_move_left();
+    }
+
+    // Check for a right push
+    if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
+        paddle_move_right();
+    }
+}
+
+
+static uint8_t update_display (uint8_t bitmap[], uint8_t current_column)
+{
+    // Update the display
+    get_paddle_bitmap(bitmap);
+    display_column (bitmap[current_column], current_column);
+
+    // Update column
+    current_column++;
+    if (current_column > (LEDMAT_COLS_NUM - 1)) {
+        current_column = 0;
+    }
+    return current_column;
+}
+
+
+static uint8_t run_paddle_only (uint8_t bitmap[])
+{
+    //run game with paddle only until one user fires a ball
+    uint8_t ball_fired = 0;
+    uint8_t game_mode;
+    uint8_t current_column = 0;
+    while (!ball_fired) {
+        pacer_wait ();
+        
+        //listen for move paddle instructions
+        move_paddle();
+        current_column = update_display(bitmap, current_column);
+        
+        // Check for a push
+        if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
+            // release the kraken
+            ball_fired = 1; 
+            inform_start(2); //tell other controller a ball has been released
+            game_mode = 2; //we are the one firing the ball
+        }
+        
+         // Check if the other fun kit pressed start
+        if (ir_uart_read_ready_p()) {
+            uint8_t val = ir_uart_getc();
+            uint8_t decoded_val = decode(val);
+            if (decoded_val == 2) { //we are receiving a transmission, not noise
+                ball_fired = 1;
+                game_mode = 1; //we are waiting on a ball to receive
+            }
+        }
+    }
+    return game_mode;
+}
+
+
 int main (void)
 {
     system_init ();
     uint8_t current_column = 0;
+    uint8_t bitmap[5] = {0};
     pacer_init(PACER_RATE);
     navswitch_init();
     ir_uart_init();
 
-    uint8_t game_state = 0; // State of game. 0 Text screen, 1 Start screen, 2 playing, 3 win, 4 loss
-
     tinygl_init (PACER_RATE);
     tinygl_font_set (&font5x7_1);
     tinygl_text_speed_set (MESSAGE_RATE);
-    tinygl_text("PONG ");
+    tinygl_text ("PONG ");
     tinygl_text_mode_set (TINYGL_TEXT_MODE_SCROLL);
 
     /* Initialise LED matrix pins.  */
@@ -108,125 +207,47 @@ int main (void)
         pio_config_set(rows[i], PIO_OUTPUT_HIGH);
     }
 
-    //set to x2 = 5 and x5 = 0 for funkit with ball starting offscreen
-    //set to x2 < 5 and x5 = 1 for funkit with ball starting onscreen
-    //eventually this will be determined by who starts the game
     paddle_init();
-    Ball ball = {PADDLE_START_POS,5,0,-1,0};
-    uint8_t bitmap[5] = {0};
+    run_start_menu(); //will wait until game is being started
+    uint8_t game_state = run_paddle_only(bitmap); //display paddle only until someone fires a ball
+    Ball ball;
+    if (game_state == 1) {
+        //other player is starting. Initialise ball to be offscreen and wait for transmission
+        ball_init(&ball, 0, 5, 0, 0, 0);
+    } else {
+        //we just started the game. Shoot a ball
+        uint8_t paddle_loc = get_paddle_location();
+        ball_init(&ball, paddle_loc, 1, 0, 1, 1);
+    }
+    
     get_bitmap(bitmap, ball);
     get_paddle_bitmap(bitmap);
-
     uint8_t updateBallCount = 0;
-
-    while (1)
-    {
+    while (1) {
         pacer_wait ();
+        move_paddle();
+        current_column = update_display(bitmap, current_column);
 
-        // Playing Game
-        if (game_state == 2) {
-            // Check for navswitch presses
-            navswitch_update();
-            // Check for a left push
-            if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
-                paddle_move_left();
-            }
+        updateBallCount++;
+        //if the ball is on screen and the timer is right, update location
+        if (ball.on_screen) {
+            if (updateBallCount > 100) {
+                updateBallCount = 0;
+                update_location(&ball, get_paddle_location());
+                get_bitmap(bitmap, ball);
 
-            // Check for a right push
-            if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
-                paddle_move_right();
-            }
-
-            // Update the paddle on display
-            get_paddle_bitmap(bitmap);
-            display_column (bitmap[current_column], current_column);
-
-            // Update column
-            current_column++;
-            if (current_column > (LEDMAT_COLS_NUM - 1)) {
-                current_column = 0;
-            }
-
-
-            updateBallCount++;
-            //if the ball is on screen and the timer is right, update location
-            if (ball.on_screen) {
-                if (updateBallCount > 200) {
-                    updateBallCount = 0;
-                    update_location(&ball, get_paddle_location());
-                    get_bitmap(bitmap, ball);
-
-                    if (!ball.on_screen) {
-                        //if ball just moved off screen, transmit relevant info
-                        transmit_ball(&ball);
-                    }
+                if (!ball.on_screen) {
+                    //if ball just moved off screen, transmit relevant info
+                    transmit_ball(&ball);
                 }
             }
-            else {
-                //listen constantly for transmissions while the ball is offscreen
-                receive_ball(&ball);
-                if (ball.on_screen) {
-                    //reset ball timer
-                    updateBallCount = 0;
-                    get_bitmap(bitmap, ball);
-                }
-            }
-        }
-
-        // Scrolling text screen
-        if (game_state == 0) {
-            tinygl_update();
-            // Check for navswitch presses
-            navswitch_update();
-
-            // Check for a push
-            if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-                game_state = 2;
-                transmit_ball(&ball);
-            }
-
-            // Check if the other fun kit pressed start
-            uint8_t before_screen = ball.on_screen;
+        } else {
+            //listen constantly for transmissions while the ball is offscreen
             receive_ball(&ball);
-            if (ball.on_screen != before_screen) {
-                game_state = 1;
-                ball.y = 1;
-            }
-        }
-
-        // Start screen
-        if (game_state == 1) {
-
-            // Check for navswitch presses
-            navswitch_update();
-
-            // Check for a left push
-            if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
-                paddle_move_left();
-            }
-
-            // Check for a right push
-            if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
-                paddle_move_right();
-            }
-
-            // Check for a push
-            if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-                game_state = 2;
-            }
-
-            // update ball location
-            ball.x = get_paddle_location();
-            get_bitmap(bitmap, ball);
-
-            // Update the paddle on display
-            get_paddle_bitmap(bitmap);
-            display_column (bitmap[current_column], current_column);
-
-            // Update column
-            current_column++;
-            if (current_column > (LEDMAT_COLS_NUM - 1)) {
-                current_column = 0;
+            if (ball.on_screen) {
+                //reset ball timer
+                updateBallCount = 0;
+                get_bitmap(bitmap, ball);
             }
         }
     }
