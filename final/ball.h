@@ -34,6 +34,7 @@ struct ball_s {
     uint8_t on_screen; //1 if on screen, 0 if on opponent's screen
 };
 
+void ball_init (Ball* ball, uint8_t x, uint8_t y, int8_t x_dir, int8_t y_dir, uint8_t on_screen);
 
 void update_location(Ball* ball, uint8_t paddle);
 

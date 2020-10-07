@@ -5,6 +5,15 @@
 
 #include "ball.h"
 
+void ball_init (Ball* ball, uint8_t x, uint8_t y, int8_t x_dir, int8_t y_dir, uint8_t on_screen)
+{
+    ball->x = x;
+    ball->y = y;
+    ball->direction_x = x_dir;
+    ball->direction_y = y_dir;
+    ball->on_screen = on_screen;
+}
+
 void update_location(Ball* ball, uint8_t paddle)
 {
     uint8_t hit_paddle = has_hit_paddle(ball, paddle);
