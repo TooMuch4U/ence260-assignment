@@ -1,7 +1,10 @@
-//
-// Created by Emma Hogan on 27/09/20.
-// Last edited by Emma Hogan on 28/09/20
-//
+/** @file coder.h
+ * @author Emma Hogan, Tom Rizzi
+ * @date 27 September 2020
+ * @brief communications encoding module
+ * last edited 10 October 2020 by Emma Hogan
+ */
+
 
 #ifndef CODER_H
 #include <stdint.h>
@@ -11,31 +14,14 @@
 #define PARITY_DIM 2
 #define NUM_SYNDROMES 16
 
+/** encode an arbitrary message of length 4 in bits into a 1 char long string via reed-solomon code:
+    @param message, an integer between 0 and 15
+    @return an integer representing the ascii encoding of the message */
+uint8_t encode(uint8_t message);
 
-// multiply a message vector by a generator matrix with terms over F_8
-void multiply_generator(int vector[], int matrix[][CODE_LENGTH], int result[]);
-
-
-// multiply a vector by a parity check matrix with terms over F_4
-void multiply_parity_check(int vector[], int matrix[][PARITY_DIM], int result[]);
-
-
-// subtract 2 vectors over F_4
-void subtract_vectors(int vector1[], int vector2[], int result[]);
-
-
-// convert the codeword into an ascii characters for ease of transmission
-uint8_t convert_to_char(int vector[]);
-
-
-// assign values to vector based on transmitted char
-void convert_to_vector(uint8_t c, int vector[]);
-
-
-// encode an arbitrary message of length 4 into a 1 char long string
-uint8_t encode(int message);
-
-
+/** Use reed-solomon code to decode and error correct received transmission:
+    @param transmission, the received ascii character
+    @return an integer representing the most likely original message after error correcting */
 uint8_t decode(uint8_t transmission);
 
 #endif
