@@ -9,7 +9,8 @@
 
 /** Return true if ball has hit the paddle:
     @param ball pointer to ball struct 
-    @param paddle x coordinate of centre of paddle*/
+    @param paddle x coordinate of centre of paddle
+    @return 1 if hit, else 0*/
 static uint8_t has_hit_paddle (Ball* ball, uint8_t paddle)
 {
     if (ball->y == GROUND + 1 && ball->direction_y == DOWN) {
@@ -21,14 +22,16 @@ static uint8_t has_hit_paddle (Ball* ball, uint8_t paddle)
 }
 
 /** Return true if ball has flown off screen:
-    @param ball pointer to ball struct */
+    @param ball pointer to ball struct 
+    @return 1 if ball is offscreen else 0*/
 static uint8_t has_gone_off_screen (Ball* ball)
 {
     return ball->y >= HEIGHT;
 }
 
 /** Return true if ball has hit the ground:
-    @param ball pointer to ball struct */
+    @param ball pointer to ball struct 
+    @return 1 if ball is on ground else 0*/
 static uint8_t has_hit_ground(Ball* ball)
 {
     return ball->y == GROUND && ball->direction_y == DOWN;
