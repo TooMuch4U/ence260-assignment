@@ -35,16 +35,17 @@ void update_x(Ball* ball, uint8_t hit_paddle, uint8_t paddle)
         //hit the right wall
         ball->direction_x = LEFT;
         ball->x--;
-    } else if (hit_paddle) {
+    }else if (hit_paddle) {
+        //check that paddle isn't colliding with wall as well as updating direction
         ball->direction_x = 0;
-        if (ball->x == paddle - 1) {
+        if (ball->x == paddle - 1 && ball->x != LEFT_WALL) {
             //hit left side of paddle - bounce off left
             ball->x--;
             ball->direction_x = LEFT;
         } else if (ball->x == paddle) {
             //no change to ball direction
             ball->x += ball->direction_x;
-        } else {
+        } else if (ball->x != RIGHT_WALL) {
             //ball hit right side of paddle - bounce off right
             ball->x++;
             ball->direction_x = RIGHT;
