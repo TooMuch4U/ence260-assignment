@@ -32,6 +32,7 @@ struct ball_s {
     int8_t direction_x; //-1 for left, 0 for straight, 1 for right
     int8_t direction_y; //1 for up, -1 for down
     uint8_t on_screen; //1 if on screen, 0 if on opponent's screen
+    uint8_t dead; //1 if game lost, 0 if still in play
 };
 
 void ball_init (Ball* ball, uint8_t x, uint8_t y, int8_t x_dir, int8_t y_dir, uint8_t on_screen);

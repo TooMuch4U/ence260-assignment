@@ -12,6 +12,7 @@ void ball_init (Ball* ball, uint8_t x, uint8_t y, int8_t x_dir, int8_t y_dir, ui
     ball->direction_x = x_dir;
     ball->direction_y = y_dir;
     ball->on_screen = on_screen;
+    ball->dead = 0;
 }
 
 void update_location(Ball* ball, uint8_t paddle)
@@ -57,9 +58,7 @@ void update_x(Ball* ball, uint8_t hit_paddle, uint8_t paddle)
 void update_y (Ball* ball, uint8_t hit_paddle)
 {
     if (has_hit_ground(ball)) {
-        //lost the game
-        //for now
-        ball->direction_y = UP;
+        ball->dead = 1;
     } else if (hit_paddle) {
         //ball hit the paddle
         ball->y++;
