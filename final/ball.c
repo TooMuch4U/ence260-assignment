@@ -12,7 +12,7 @@ void ball_init (Ball* ball, uint8_t x, uint8_t y, int8_t x_dir, int8_t y_dir, ui
     ball->direction_x = x_dir;
     ball->direction_y = y_dir;
     ball->on_screen = on_screen;
-    ball->dead = 0;
+    ball->dead = 0; //set ball to not be dead initially
 }
 
 void update_location(Ball* ball, uint8_t paddle)
@@ -84,15 +84,17 @@ uint8_t has_gone_off_screen (Ball* ball)
     return ball->y >= HEIGHT;
 }
 
-void get_bitmap(uint8_t bitmap[], Ball ball)
+void get_bitmap(uint8_t bitmap[], Ball* ball)
 {
+    uint8_t paddle = bitmap[4];
     for (uint8_t i = 0; i < HEIGHT; i++) {
-        if (i != (HEIGHT - 1 - ball.y)) {
+        if (i != (HEIGHT - 1 - ball->y)) {
             bitmap[i] = 0x00;
         } else {
-            bitmap[i] = 1 << (RIGHT_WALL - ball.x);
+            bitmap[i] = 1 << (RIGHT_WALL - ball->x);
         }
     }
+    bitmap[4] |= paddle;
 }
 
 uint8_t has_hit_ground(Ball* ball)

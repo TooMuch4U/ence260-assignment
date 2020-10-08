@@ -45,7 +45,7 @@ void update_y (Ball* ball, uint8_t hit_paddle);
 
 uint8_t has_hit_paddle (Ball* ball, uint8_t paddle);
 
-void get_bitmap(uint8_t bitmap[], Ball ball);
+void get_bitmap(uint8_t bitmap[], Ball* ball);
 
 uint8_t has_gone_off_screen (Ball* ball);
 

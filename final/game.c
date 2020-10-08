@@ -157,7 +157,6 @@ static void move_paddle (void)
 static uint8_t update_display (uint8_t bitmap[], uint8_t current_column)
 {
     // Update the display
-    get_paddle_bitmap(bitmap);
     display_column (bitmap[current_column], current_column);
 
     // Update column
@@ -180,6 +179,7 @@ static uint8_t run_paddle_only (uint8_t bitmap[])
         
         //listen for move paddle instructions
         move_paddle();
+        get_paddle_bitmap(bitmap);
         current_column = update_display(bitmap, current_column);
         
         // Check for a push
@@ -281,12 +281,13 @@ int main (void)
         init_led_matrix();
         game_state = run_paddle_only(bitmap); //display paddle only until someone fires a ball
         initialise_ball(&ball, game_state);
-        get_bitmap(bitmap, ball);
-        get_paddle_bitmap(bitmap);
         round_over = 0;
         while (!round_over) {
             pacer_wait();
             move_paddle();
+            
+            get_paddle_bitmap(bitmap);
+            get_bitmap(bitmap, &ball);
             current_column = update_display(bitmap, current_column);
 
             updateBallCount++;
@@ -295,7 +296,6 @@ int main (void)
                 if (updateBallCount > 100) {
                     updateBallCount = 0;
                     update_location(&ball, get_paddle_location());
-                    get_bitmap(bitmap, ball);
 
                     if (!ball.on_screen) {
                         //if ball just moved off screen, transmit relevant info
@@ -317,7 +317,6 @@ int main (void)
                 } else if (ball.on_screen) {
                     //reset ball timer
                     updateBallCount = 0;
-                    get_bitmap(bitmap, ball);
                 }
             }
         }
