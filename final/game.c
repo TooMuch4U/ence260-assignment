@@ -10,10 +10,20 @@
 #define HEIGHT 5
 #define COORD_OFFSET 1
 #define DIR_OFFSET 2
-#define PACER_RATE 500
+#define PACER_RATE 400
 #define MESSAGE_RATE 10
 #define DEAD_BALL 15 //transmission value for when ball has died
 #define WINNING_SCORE '5'
+
+//GAME MODES: START_MENU = 0, PADDLE_MODE = 1, PLAY_MODE = 2, DISPLAY_SCORE_MODE = 3, GAME_OVER_MODE = 4
+typedef struct {
+    char score;
+    char opponent_score;
+    uint8_t game_mode;
+    uint8_t ball_counter;
+    uint8_t column_counter;
+    uint8_t display_counter;
+} Game;
 
 /** transmit relevant ball information */
 static void transmit_ball (Ball* ball)
@@ -73,29 +83,25 @@ static void receive_ball (Ball* ball)
 
 
 /** display scrolling PONG text and wait for user to signal they wish to begin game */
-static void run_start_menu (void)
+static void run_start_menu (Game* game)
 {
     // scroll the start of game text until one player starts paddle screen
-    scroll_text("PONG ");
-    uint8_t display_mode = 0;
-    while (!display_mode) {
-        pacer_wait ();
-        tinygl_update();
-        // Check for navswitch presses
-        navswitch_update();
+    //scroll_text("PONG ");
+    tinygl_update();
+    // Check for navswitch presses
+    navswitch_update();
 
-        // Check for a push
-        if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-            display_mode = 1;
-            inform_start(1); //tell other controller a game has been started
-        }
-        // Check if the other fun kit pressed start
-        if (ir_uart_read_ready_p()) {
-            uint8_t val = ir_uart_getc();
-            uint8_t decoded_val = decode(val);
-            if (decoded_val == 1) { //we are receiving a transmission, not noise
-                display_mode = 1;
-            }
+    // Check for a push
+    if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
+        inform_start(1); //tell other controller a game has been started
+        game->game_mode = 1;
+    }
+    // Check if the other fun kit pressed start
+    if (ir_uart_read_ready_p()) {
+        uint8_t val = ir_uart_getc();
+        uint8_t decoded_val = decode(val);
+        if (decoded_val == 1) { //we are receiving a transmission, not noise
+            game->game_mode = 1;
         }
     }
 }
@@ -118,42 +124,6 @@ static void move_paddle (Paddle* paddle)
 }
 
 
-/** run game with paddle movement only and wait for a player to launch a ball and start a round */
-static uint8_t run_paddle_only (Paddle* paddle, uint8_t bitmap[])
-{
-    //run game with paddle only until one user fires a ball
-    uint8_t ball_fired = 0;
-    uint8_t game_mode;
-    uint8_t current_column = 0;
-    while (!ball_fired) {
-        pacer_wait ();
-
-        //listen for move paddle instructions
-        move_paddle(paddle);
-        get_paddle_bitmap(paddle, bitmap);
-        current_column = update_display(bitmap, current_column);
-
-        // Check for a push
-        if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-            // release the kraken
-            ball_fired = 1;
-            inform_start(2); //tell other controller a ball has been released
-            game_mode = 2; //we are the one firing the ball
-        }
-
-         // Check if the other fun kit pressed start
-        if (ir_uart_read_ready_p()) {
-            uint8_t val = ir_uart_getc();
-            uint8_t decoded_val = decode(val);
-            if (decoded_val == 2) { //we are receiving a transmission, not noise
-                ball_fired = 1;
-                game_mode = 1; //we are waiting on a ball to receive
-            }
-        }
-    }
-    return game_mode;
-}
-
 /** initialise the attributes of the ball struct based on position of paddle on launch */
 static void initialise_ball (Ball* ball, Paddle* paddle, uint8_t game_state)
 {
@@ -164,6 +134,37 @@ static void initialise_ball (Ball* ball, Paddle* paddle, uint8_t game_state)
         //we just started the game. Shoot a ball
         uint8_t paddle_loc = get_paddle_location(paddle);
         ball_init(ball, paddle_loc, 1, 0, 1, 1);
+    }
+}
+
+
+
+/** run game with paddle movement only and wait for a player to launch a ball and start a round */
+static void run_paddle_only (Ball* ball, Paddle* paddle, Game* game, uint8_t bitmap[])
+{
+    //run game with paddle only until one user fires a ball
+
+    //listen for move paddle instructions
+    move_paddle(paddle);
+    get_paddle_bitmap(paddle, bitmap);
+    game->column_counter = update_display(bitmap, game->column_counter);
+
+    // Check for a push
+    if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
+        // release the kraken
+        inform_start(2); //tell other controller a ball has been released
+        game->game_mode = 2;
+        initialise_ball(ball, paddle, 2);
+    }
+
+     // Check if the other fun kit pressed start
+    if (ir_uart_read_ready_p()) {
+        uint8_t val = ir_uart_getc();
+        uint8_t decoded_val = decode(val);
+        if (decoded_val == 2) { //we are receiving a transmission, not noise
+            game->game_mode = 2;
+            initialise_ball(ball, paddle, 1);
+        }
     }
 }
 
@@ -181,89 +182,106 @@ static void blue_led (void)
     }
 }
 
-/** MAIN MAIN MAIN MAIN MAIN MAIN MAIN MAIN */
-int main (void)
+static void play_round (Paddle* paddle, Ball* ball, Game* game, uint8_t bitmap[])
+{
+    move_paddle(paddle);
+    get_paddle_bitmap(paddle, bitmap);
+    get_bitmap(bitmap, ball);
+    game->column_counter = update_display(bitmap, game->column_counter);
+
+    game->ball_counter++;
+
+    //if the ball is on screen and the timer is right, update location
+    if (ball->on_screen) {
+        if (game->ball_counter > 100) {
+            game->ball_counter = 0;
+            update_location(ball, get_paddle_location(paddle));
+
+            if (!ball->on_screen) {
+                //if ball just moved off screen, transmit relevant info
+                transmit_ball(ball);
+            } else if (ball->dead) {
+                //just lost the round
+                transmit_ball(ball);
+                game->opponent_score++;
+                game->game_mode = 3;
+            }
+        }
+    } else {
+        //listen constantly for transmissions while the ball is offscreen
+        receive_ball(ball);
+        if (ball->dead) {
+            game->score++;
+            game->game_mode = 3;
+        } else if (ball->on_screen) {
+            //reset ball timer
+            game->ball_counter = 0;
+        }
+    }
+}
+
+static void check_display_timeout(Game* game)
+{
+    if (game->display_counter > 250) {
+        game->display_counter = 0;
+        if (game->score == WINNING_SCORE) {
+            game->game_mode = 4;
+            scroll_text("WINNER :) ");
+        } else if (game->opponent_score == WINNING_SCORE) {
+            game->game_mode = 4;
+            scroll_text("LOSER :( ");
+        } else {
+            game->game_mode = 1;
+        }
+    }
+}
+
+static void initialise(void)
 {
     system_init ();
-    uint8_t current_column = 0;
-    uint8_t bitmap[5] = {0};
     pacer_init(PACER_RATE);
     navswitch_init();
     ir_uart_init();
+    init_led_matrix();
+}
 
+
+/** MAIN MAIN MAIN MAIN MAIN MAIN MAIN MAIN */
+int main (void)
+{
+    initialise();
+
+    uint8_t bitmap[5] = {0};
     Paddle paddle;
     paddle_init(&paddle);
-
-    init_led_matrix();
-    run_start_menu(); //will wait until game is being started
-
     Ball ball;
-    uint8_t game_state;
-    uint8_t updateBallCount = 0;
-    uint8_t game_over = 0;
-    uint8_t round_over;
-    char score = '0';
-    char opponent_score = '0';
+    Game game = {'0', '0', 0, 0, 0, 0};
+    scroll_text("PONG ");
 
-    while (!game_over) {
-        init_led_matrix();
-        game_state = run_paddle_only(&paddle, bitmap); //display paddle only until someone fires a ball
-        initialise_ball(&ball, &paddle, game_state);
-        round_over = 0;
-        while (!round_over) {
-            pacer_wait();
-            move_paddle(&paddle);
-
-            get_paddle_bitmap(&paddle, bitmap);
-            get_bitmap(bitmap, &ball);
-            current_column = update_display(bitmap, current_column);
-
-            updateBallCount++;
-            //if the ball is on screen and the timer is right, update location
-            if (ball.on_screen) {
-                if (updateBallCount > 100) {
-                    updateBallCount = 0;
-                    update_location(&ball, get_paddle_location(&paddle));
-
-                    if (!ball.on_screen) {
-                        //if ball just moved off screen, transmit relevant info
-                        transmit_ball(&ball);
-                    } else if (ball.dead) {
-                        //just lost the round
-                        transmit_ball(&ball);
-                        round_over = 1;
-                        opponent_score++;
-                    }
-                }
-            } else {
-                //listen constantly for transmissions while the ball is offscreen
-                receive_ball(&ball);
-                if (ball.dead) {
-                    round_over = 1;
-                    score++;
-                    //blue_led();
-                } else if (ball.on_screen) {
-                    //reset ball timer
-                    updateBallCount = 0;
-                }
-            }
-        }
-        //display current score
-        display_character(score);
-        if (score == WINNING_SCORE) {
-            //game over, we won
-            game_over = 1;
-            scroll_text("WINNER :) ");
-        } else if (opponent_score == WINNING_SCORE) {
-            //game over, we lost
-            game_over = 1;
-            scroll_text("LOSER :( ");
-        }
-    }
-    while(1)
-    {
-        //display winner/loser on repeat until finished
+    while (1) {
         pacer_wait();
-        tinygl_update();
+        switch(game.game_mode) {
+            case 0 :
+                run_start_menu(&game);
+                break;
+
+            case 1 :
+                run_paddle_only(&ball, &paddle, &game, bitmap);
+                break;
+
+            case 2 :
+                play_round(&paddle, &ball, &game, bitmap);
+                break;
+
+            case 3 :
+                game.display_counter++;
+                display_character(game.score);
+                check_display_timeout(&game);
+                break;
+
+            case 4 :
+                tinygl_update();
+                break;
+        }
     }
 }

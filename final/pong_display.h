@@ -12,8 +12,7 @@
 #include "tinygl.h"
 #include "system.h"
 #include "../fonts/font5x7_1.h"
-
-#define PACER_RATE 500
+#define PACER_RATE 400
 #define MESSAGE_RATE 10
 
 void init_led_matrix(void);

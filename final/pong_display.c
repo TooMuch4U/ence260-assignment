@@ -81,11 +81,7 @@ void display_character (char character)
     char buffer[2];
     buffer[0] = character;
     buffer[1] = '\0';
-    tinygl_text_mode_set (TINYGL_TEXT_MODE_STEP); //kind of flash onto screen
+    //tinygl_text_mode_set (TINYGL_TEXT_MODE_STEP); //kind of flash onto screen
     tinygl_text (buffer);
-
-    for (int i = 0; i < 500; i++) {
-        pacer_wait();
-        tinygl_update();
-    }
+    tinygl_update();
 }
