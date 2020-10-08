@@ -5,8 +5,6 @@
  * last edited 9 October 2020 by Emma Hogan
  */
 
-//TODO: Docstring tihs
-
 #ifndef BALL_H
 #define BALL_H
 
