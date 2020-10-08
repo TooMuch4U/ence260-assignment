@@ -14,7 +14,7 @@
 #define DIR_OFFSET 2
 #define PACER_RATE 500
 #define MESSAGE_RATE 10
-#define DEAD_BALL 15
+#define DEAD_BALL 15 //transmission value for when ball has died
 #define WINNING_SCORE '5'
 
 /** Define PIO pins driving LED matrix rows.  */
@@ -33,6 +33,7 @@ static const pio_t cols[] =
 };
 
 static pio_t prev;
+/** Flash the correct bit pattern for current column in led matrix */
 static void display_column (uint8_t row_pattern, uint8_t current_column)
 {
     pio_output_high(cols[prev]);
@@ -48,50 +49,53 @@ static void display_column (uint8_t row_pattern, uint8_t current_column)
     pio_output_low(cols[current_column]);
 }
 
+/** transmit relevant ball information */
 static void transmit_ball (Ball* ball)
 {
     if (!ball->dead) {
         // note that x direction and coord must mirror current direction and coord because fun kits are facing eachother
         int x_coord = RIGHT_WALL - ball->x;
-        int x_dir = -1 * ball->direction_x; 
-        
+        int x_dir = -1 * ball->direction_x;
+
         // enforce encodings to be strictly positive
         int encoded_x_coord = encode(x_coord + COORD_OFFSET);
         int encoded_x_dir = encode(x_dir + DIR_OFFSET);
-        
+
         ir_uart_putc(encoded_x_coord);
         ir_uart_putc(encoded_x_dir);
-        
+
     } else { //ball just died, only need to transmit deadness
         uint8_t encoded_message = encode(DEAD_BALL);
         ir_uart_putc(encoded_message);
     }
 }
 
+/** inform other microcontroller that game has been started */
 static void inform_start (uint8_t mode)
 {
     uint8_t val = encode(mode);
     ir_uart_putc(val);
 }
 
+/** Receive relevant ball information from other device */
 static void receive_ball (Ball* ball)
 {
     int encoded_x_coord;
     int encoded_x_dir;
     if (ir_uart_read_ready_p()) {
-	    encoded_x_coord = ir_uart_getc();
+        encoded_x_coord = ir_uart_getc();
         int x_coord = decode(encoded_x_coord) - COORD_OFFSET;
         if (x_coord >= LEFT_WALL && x_coord <= RIGHT_WALL) { //we are receiving a transmission of ball location
             encoded_x_dir = ir_uart_getc();
             int x_dir = decode(encoded_x_dir) - DIR_OFFSET;
-            
+
             ball->x = x_coord;
             ball->direction_x = x_dir;
-            
+
             //init y values
             ball->y = HEIGHT - 1;
             ball->direction_y = DOWN;
-            
+
             //set to on screen
             ball->on_screen = 1;
         } else if (x_coord + COORD_OFFSET == DEAD_BALL) { //we are being told the ball is dead
@@ -100,6 +104,7 @@ static void receive_ball (Ball* ball)
     }
 }
 
+/** setup tinygl to display given text in scrolling mode */
 static void scroll_text(char* text)
 {
     tinygl_init (PACER_RATE);
@@ -109,7 +114,7 @@ static void scroll_text(char* text)
     tinygl_text_mode_set (TINYGL_TEXT_MODE_SCROLL);
 }
 
-
+/** display scrolling PONG text and wait for user to signal they wish to begin game */
 static void run_start_menu (void)
 {
     // scroll the start of game text until one player starts paddle screen
@@ -137,6 +142,7 @@ static void run_start_menu (void)
     }
 }
 
+/** interpret navswitch input to update paddle location */
 static void move_paddle (void)
 {
     // Check for navswitch presses
@@ -153,7 +159,7 @@ static void move_paddle (void)
     }
 }
 
-
+/** update the led matrix to display given bitmap, flashing 1 column at a time */
 static uint8_t update_display (uint8_t bitmap[], uint8_t current_column)
 {
     // Update the display
@@ -167,7 +173,7 @@ static uint8_t update_display (uint8_t bitmap[], uint8_t current_column)
     return current_column;
 }
 
-
+/** run game with paddle movement only and wait for a player to launch a ball and start a round */
 static uint8_t run_paddle_only (uint8_t bitmap[])
 {
     //run game with paddle only until one user fires a ball
@@ -176,20 +182,20 @@ static uint8_t run_paddle_only (uint8_t bitmap[])
     uint8_t current_column = 0;
     while (!ball_fired) {
         pacer_wait ();
-        
+
         //listen for move paddle instructions
         move_paddle();
         get_paddle_bitmap(bitmap);
         current_column = update_display(bitmap, current_column);
-        
+
         // Check for a push
         if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
             // release the kraken
-            ball_fired = 1; 
+            ball_fired = 1;
             inform_start(2); //tell other controller a ball has been released
             game_mode = 2; //we are the one firing the ball
         }
-        
+
          // Check if the other fun kit pressed start
         if (ir_uart_read_ready_p()) {
             uint8_t val = ir_uart_getc();
@@ -203,6 +209,7 @@ static uint8_t run_paddle_only (uint8_t bitmap[])
     return game_mode;
 }
 
+/** initialise the attributes of the ball struct based on position of paddle on launch */
 static void initialise_ball (Ball* ball, uint8_t game_state)
 {
     if (game_state == 1) {
@@ -215,7 +222,7 @@ static void initialise_ball (Ball* ball, uint8_t game_state)
     }
 }
 
-
+/** flash a single character onto the screen for a small amount of time */
 static void display_character (char character)
 {
     char buffer[2];
@@ -223,13 +230,15 @@ static void display_character (char character)
     buffer[1] = '\0';
     tinygl_text_mode_set (TINYGL_TEXT_MODE_STEP); //kind of flash onto screen
     tinygl_text (buffer);
-    
+
     for (int i = 0; i < 500; i++) {
         pacer_wait();
         tinygl_update();
     }
 }
 
+
+/** initialise the columns of the led matrix */
 static void init_led_matrix(void)
 {
     /* Initialise LED matrix pins.  */
@@ -241,7 +250,8 @@ static void init_led_matrix(void)
     }
 }
 
-static void blue_led (void) 
+/** for debugging purposes */
+static void blue_led (void)
 {
     //freezes program, use for debugging
     /* Initialise port to drive LED 1.  */
@@ -254,7 +264,7 @@ static void blue_led (void)
     }
 }
 
-
+/** MAIN MAIN MAIN MAIN MAIN MAIN MAIN MAIN */
 int main (void)
 {
     system_init ();
@@ -264,11 +274,11 @@ int main (void)
     navswitch_init();
     ir_uart_init();
     paddle_init();
-    
+
     init_led_matrix();
 
     run_start_menu(); //will wait until game is being started
-    
+
     Ball ball;
     uint8_t game_state;
     uint8_t updateBallCount = 0;
@@ -276,7 +286,7 @@ int main (void)
     uint8_t round_over;
     char score = '0';
     char opponent_score = '0';
-    
+
     while (!game_over) {
         init_led_matrix();
         game_state = run_paddle_only(bitmap); //display paddle only until someone fires a ball
@@ -285,7 +295,7 @@ int main (void)
         while (!round_over) {
             pacer_wait();
             move_paddle();
-            
+
             get_paddle_bitmap(bitmap);
             get_bitmap(bitmap, &ball);
             current_column = update_display(bitmap, current_column);
