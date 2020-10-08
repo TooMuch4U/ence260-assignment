@@ -14,28 +14,34 @@
 #define MESSAGE_RATE 10
 #define DEAD_BALL 15 //transmission value for when ball has died
 #define WINNING_SCORE '5'
+#define START_MENU 0
+#define PADDLE_MODE 1
+#define PLAY_MODE 2
+#define DISPLAY_SCORE_MODE 3
+#define GAME_OVER_MODE 4
 
-//GAME MODES: START_MENU = 0, PADDLE_MODE = 1, PLAY_MODE = 2, DISPLAY_SCORE_MODE = 3, GAME_OVER_MODE = 4
+
 typedef struct {
     char score;
     char opponent_score;
-    uint8_t game_mode;
+    uint8_t game_mode; //game modes: START_MENU = 0, PADDLE_MODE = 1, PLAY_MODE = 2, DISPLAY_SCORE_MODE = 3, GAME_OVER_MODE = 4
     uint8_t ball_counter;
     uint8_t column_counter;
     uint8_t display_counter;
 } Game;
+
 
 /** transmit relevant ball information */
 static void transmit_ball (Ball* ball)
 {
     if (!ball->dead) {
         // note that x direction and coord must mirror current direction and coord because fun kits are facing eachother
-        int x_coord = RIGHT_WALL - ball->x;
-        int x_dir = -1 * ball->direction_x;
+        uint8_t x_coord = RIGHT_WALL - ball->x;
+        int8_t x_dir = -1 * ball->direction_x;
 
         // enforce encodings to be strictly positive
-        int encoded_x_coord = encode(x_coord + COORD_OFFSET);
-        int encoded_x_dir = encode(x_dir + DIR_OFFSET);
+        uint8_t encoded_x_coord = encode(x_coord + COORD_OFFSET);
+        uint8_t encoded_x_dir = encode(x_dir + DIR_OFFSET);
 
         ir_uart_putc(encoded_x_coord);
         ir_uart_putc(encoded_x_dir);
@@ -57,14 +63,14 @@ static void inform_start (uint8_t mode)
 /** Receive relevant ball information from other device */
 static void receive_ball (Ball* ball)
 {
-    int encoded_x_coord;
-    int encoded_x_dir;
+    uint8_t encoded_x_coord;
+    uint8_t encoded_x_dir;
     if (ir_uart_read_ready_p()) {
         encoded_x_coord = ir_uart_getc();
-        int x_coord = decode(encoded_x_coord) - COORD_OFFSET;
+        uint8_t x_coord = decode(encoded_x_coord) - COORD_OFFSET;
         if (x_coord >= LEFT_WALL && x_coord <= RIGHT_WALL) { //we are receiving a transmission of ball location
             encoded_x_dir = ir_uart_getc();
-            int x_dir = decode(encoded_x_dir) - DIR_OFFSET;
+            int8_t x_dir = decode(encoded_x_dir) - DIR_OFFSET;
 
             ball->x = x_coord;
             ball->direction_x = x_dir;
@@ -94,14 +100,14 @@ static void run_start_menu (Game* game)
     // Check for a push
     if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
         inform_start(1); //tell other controller a game has been started
-        game->game_mode = 1;
+        game->game_mode = PADDLE_MODE;
     }
     // Check if the other fun kit pressed start
     if (ir_uart_read_ready_p()) {
         uint8_t val = ir_uart_getc();
         uint8_t decoded_val = decode(val);
         if (decoded_val == 1) { //we are receiving a transmission, not noise
-            game->game_mode = 1;
+            game->game_mode = PADDLE_MODE;
         }
     }
 }
@@ -153,7 +159,7 @@ static void run_paddle_only (Ball* ball, Paddle* paddle, Game* game, uint8_t bit
     if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
         // release the kraken
         inform_start(2); //tell other controller a ball has been released
-        game->game_mode = 2;
+        game->game_mode = PLAY_MODE;
         initialise_ball(ball, paddle, 2);
     }
 
@@ -162,7 +168,7 @@ static void run_paddle_only (Ball* ball, Paddle* paddle, Game* game, uint8_t bit
         uint8_t val = ir_uart_getc();
         uint8_t decoded_val = decode(val);
         if (decoded_val == 2) { //we are receiving a transmission, not noise
-            game->game_mode = 2;
+            game->game_mode = PLAY_MODE;
             initialise_ball(ball, paddle, 1);
         }
     }
@@ -204,7 +210,7 @@ static void play_round (Paddle* paddle, Ball* ball, Game* game, uint8_t bitmap[]
                 //just lost the round
                 transmit_ball(ball);
                 game->opponent_score++;
-                game->game_mode = 3;
+                game->game_mode = DISPLAY_SCORE_MODE;
             }
         }
     } else {
@@ -212,7 +218,7 @@ static void play_round (Paddle* paddle, Ball* ball, Game* game, uint8_t bitmap[]
         receive_ball(ball);
         if (ball->dead) {
             game->score++;
-            game->game_mode = 3;
+            game->game_mode = DISPLAY_SCORE_MODE;
         } else if (ball->on_screen) {
             //reset ball timer
             game->ball_counter = 0;
@@ -225,13 +231,13 @@ static void check_display_timeout(Game* game)
     if (game->display_counter > 250) {
         game->display_counter = 0;
         if (game->score == WINNING_SCORE) {
-            game->game_mode = 4;
+            game->game_mode = GAME_OVER_MODE;
             scroll_text("WINNER :) ");
         } else if (game->opponent_score == WINNING_SCORE) {
-            game->game_mode = 4;
+            game->game_mode = GAME_OVER_MODE;
             scroll_text("LOSER :( ");
         } else {
-            game->game_mode = 1;
+            game->game_mode = PADDLE_MODE;
         }
     }
 }
@@ -246,7 +252,6 @@ static void initialise(void)
 }
 
 
-/** MAIN MAIN MAIN MAIN MAIN MAIN MAIN MAIN */
 int main (void)
 {
     initialise();
@@ -261,25 +266,25 @@ int main (void)
     while (1) {
         pacer_wait();
         switch(game.game_mode) {
-            case 0 :
+            case START_MENU:
                 run_start_menu(&game);
                 break;
 
-            case 1 :
+            case PADDLE_MODE :
                 run_paddle_only(&ball, &paddle, &game, bitmap);
                 break;
 
-            case 2 :
+            case PLAY_MODE :
                 play_round(&paddle, &ball, &game, bitmap);
                 break;
 
-            case 3 :
+            case DISPLAY_SCORE_MODE :
                 game.display_counter++;
                 display_character(game.score);
                 check_display_timeout(&game);
                 break;
 
-            case 4 :
+            case GAME_OVER_MODE :
                 tinygl_update();
                 break;
         }
