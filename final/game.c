@@ -143,19 +143,19 @@ static void run_start_menu (void)
 }
 
 /** interpret navswitch input to update paddle location */
-static void move_paddle (void)
+static void move_paddle (Paddle* paddle)
 {
     // Check for navswitch presses
     navswitch_update();
 
     //Check for a left push
     if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
-        paddle_move_left();
+        paddle_move_left(paddle);
     }
 
     // Check for a right push
     if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
-        paddle_move_right();
+        paddle_move_right(paddle);
     }
 }
 
@@ -174,7 +174,7 @@ static uint8_t update_display (uint8_t bitmap[], uint8_t current_column)
 }
 
 /** run game with paddle movement only and wait for a player to launch a ball and start a round */
-static uint8_t run_paddle_only (uint8_t bitmap[])
+static uint8_t run_paddle_only (Paddle* paddle, uint8_t bitmap[])
 {
     //run game with paddle only until one user fires a ball
     uint8_t ball_fired = 0;
@@ -184,8 +184,8 @@ static uint8_t run_paddle_only (uint8_t bitmap[])
         pacer_wait ();
 
         //listen for move paddle instructions
-        move_paddle();
-        get_paddle_bitmap(bitmap);
+        move_paddle(paddle);
+        get_paddle_bitmap(paddle, bitmap);
         current_column = update_display(bitmap, current_column);
 
         // Check for a push
@@ -210,14 +210,14 @@ static uint8_t run_paddle_only (uint8_t bitmap[])
 }
 
 /** initialise the attributes of the ball struct based on position of paddle on launch */
-static void initialise_ball (Ball* ball, uint8_t game_state)
+static void initialise_ball (Ball* ball, Paddle* paddle, uint8_t game_state)
 {
     if (game_state == 1) {
         //other player is starting. Initialise ball to be offscreen and wait for transmission
         ball_init(ball, 0, 5, 0, 0, 0);
     } else {
         //we just started the game. Shoot a ball
-        uint8_t paddle_loc = get_paddle_location();
+        uint8_t paddle_loc = get_paddle_location(paddle);
         ball_init(ball, paddle_loc, 1, 0, 1, 1);
     }
 }
@@ -236,7 +236,6 @@ static void display_character (char character)
         tinygl_update();
     }
 }
-
 
 /** initialise the columns of the led matrix */
 static void init_led_matrix(void)
@@ -273,10 +272,11 @@ int main (void)
     pacer_init(PACER_RATE);
     navswitch_init();
     ir_uart_init();
-    paddle_init();
+
+    Paddle paddle;
+    paddle_init(&paddle);
 
     init_led_matrix();
-
     run_start_menu(); //will wait until game is being started
 
     Ball ball;
@@ -289,14 +289,14 @@ int main (void)
 
     while (!game_over) {
         init_led_matrix();
-        game_state = run_paddle_only(bitmap); //display paddle only until someone fires a ball
-        initialise_ball(&ball, game_state);
+        game_state = run_paddle_only(&paddle, bitmap); //display paddle only until someone fires a ball
+        initialise_ball(&ball, &paddle, game_state);
         round_over = 0;
         while (!round_over) {
             pacer_wait();
-            move_paddle();
+            move_paddle(&paddle);
 
-            get_paddle_bitmap(bitmap);
+            get_paddle_bitmap(&paddle, bitmap);
             get_bitmap(bitmap, &ball);
             current_column = update_display(bitmap, current_column);
 
@@ -305,7 +305,7 @@ int main (void)
             if (ball.on_screen) {
                 if (updateBallCount > 100) {
                     updateBallCount = 0;
-                    update_location(&ball, get_paddle_location());
+                    update_location(&ball, get_paddle_location(&paddle));
 
                     if (!ball.on_screen) {
                         //if ball just moved off screen, transmit relevant info
