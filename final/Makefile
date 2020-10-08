@@ -16,7 +16,7 @@ all: game.out
 
 
 # Compile: create object files from C source files.
-game.o: game.c ../../drivers/avr/system.h ../../drivers/display.h ../../utils/pacer.h ball.h coder.h paddle.h ../../drivers/navswitch.h ../../drivers/avr/ir_uart.h  pong_display.h
+game.o: game.c ../../drivers/avr/system.h ../../drivers/display.h ../../utils/pacer.h ../../drivers/navswitch.h ../../drivers/avr/ir_uart.h  pong_display.h communications.h ball.h paddle.h 
 	$(CC) -c $(CFLAGS) $< -o $@
 
 pong_display.o: pong_display.c ../../drivers/avr/pio.h ../../drivers/display.h ../../fonts/font5x7_1.h ../../utils/font.h ../../utils/pacer.h pong_display.h
@@ -65,6 +65,8 @@ tinygl.o: ../../utils/tinygl.c ../../drivers/avr/system.h ../../drivers/display.
 
 ledmat.o: ../../drivers/ledmat.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/ledmat.h
 	$(CC) -c $(CFLAGS) $< -o $@
+	
+communications.o: communications.c coder.h ball.h ../../drivers/avr/ir_uart.h communications.h
 
 coder.o: coder.c coder.h
 	$(CC) -c $(CFLAGS) $< -o $@
@@ -72,7 +74,7 @@ coder.o: coder.c coder.h
 
 
 # Link: create ELF output file from object files.
-game.out: game.o display.o system.o navswitch.o pio.o prescale.o timer.o timer0.o usart1.o pacer.o ball.o paddle.o coder.o ir_uart.o ledmat.o font.o tinygl.o pong_display.o
+game.out: game.o display.o system.o navswitch.o pio.o prescale.o timer.o timer0.o usart1.o pacer.o ball.o paddle.o coder.o ir_uart.o ledmat.o font.o tinygl.o pong_display.o communications.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 
