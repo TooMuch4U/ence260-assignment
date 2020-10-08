@@ -14,6 +14,8 @@
 #define DIR_OFFSET 2
 #define PACER_RATE 500
 #define MESSAGE_RATE 10
+#define DEAD_BALL 15
+#define WINNING_SCORE '5'
 
 /** Define PIO pins driving LED matrix rows.  */
 static const pio_t rows[] =
@@ -48,16 +50,22 @@ static void display_column (uint8_t row_pattern, uint8_t current_column)
 
 static void transmit_ball (Ball* ball)
 {
-    // note that x direction and coord must mirror current direction and coord because fun kits are facing eachother
-    int x_coord = RIGHT_WALL - ball->x;
-    int x_dir = -1 * ball->direction_x; 
-    
-    // enforce encodings to be strictly positive
-    int encoded_x_coord = encode(x_coord + COORD_OFFSET);
-    int encoded_x_dir = encode(x_dir + DIR_OFFSET);
-    
-    ir_uart_putc(encoded_x_coord);
-    ir_uart_putc(encoded_x_dir);
+    if (!ball->dead) {
+        // note that x direction and coord must mirror current direction and coord because fun kits are facing eachother
+        int x_coord = RIGHT_WALL - ball->x;
+        int x_dir = -1 * ball->direction_x; 
+        
+        // enforce encodings to be strictly positive
+        int encoded_x_coord = encode(x_coord + COORD_OFFSET);
+        int encoded_x_dir = encode(x_dir + DIR_OFFSET);
+        
+        ir_uart_putc(encoded_x_coord);
+        ir_uart_putc(encoded_x_dir);
+        
+    } else { //ball just died, only need to transmit deadness
+        uint8_t encoded_message = encode(DEAD_BALL);
+        ir_uart_putc(encoded_message);
+    }
 }
 
 static void inform_start (uint8_t mode)
@@ -73,7 +81,7 @@ static void receive_ball (Ball* ball)
     if (ir_uart_read_ready_p()) {
 	    encoded_x_coord = ir_uart_getc();
         int x_coord = decode(encoded_x_coord) - COORD_OFFSET;
-        if (x_coord >= LEFT_WALL && x_coord <= RIGHT_WALL) { //we are receiving a transmission, not noise
+        if (x_coord >= LEFT_WALL && x_coord <= RIGHT_WALL) { //we are receiving a transmission of ball location
             encoded_x_dir = ir_uart_getc();
             int x_dir = decode(encoded_x_dir) - DIR_OFFSET;
             
@@ -86,14 +94,26 @@ static void receive_ball (Ball* ball)
             
             //set to on screen
             ball->on_screen = 1;
+        } else if (x_coord + COORD_OFFSET == DEAD_BALL) { //we are being told the ball is dead
+            ball->dead = 1;
         }
     }
+}
+
+static void scroll_text(char* text)
+{
+    tinygl_init (PACER_RATE);
+    tinygl_font_set (&font5x7_1);
+    tinygl_text_speed_set (MESSAGE_RATE);
+    tinygl_text (text);
+    tinygl_text_mode_set (TINYGL_TEXT_MODE_SCROLL);
 }
 
 
 static void run_start_menu (void)
 {
     // scroll the start of game text until one player starts paddle screen
+    scroll_text("PONG ");
     uint8_t display_mode = 0;
     while (!display_mode) {
         pacer_wait ();
@@ -183,6 +203,57 @@ static uint8_t run_paddle_only (uint8_t bitmap[])
     return game_mode;
 }
 
+static void initialise_ball (Ball* ball, uint8_t game_state)
+{
+    if (game_state == 1) {
+        //other player is starting. Initialise ball to be offscreen and wait for transmission
+        ball_init(ball, 0, 5, 0, 0, 0);
+    } else {
+        //we just started the game. Shoot a ball
+        uint8_t paddle_loc = get_paddle_location();
+        ball_init(ball, paddle_loc, 1, 0, 1, 1);
+    }
+}
+
+
+static void display_character (char character)
+{
+    char buffer[2];
+    buffer[0] = character;
+    buffer[1] = '\0';
+    tinygl_text_mode_set (TINYGL_TEXT_MODE_STEP); //kind of flash onto screen
+    tinygl_text (buffer);
+    
+    for (int i = 0; i < 500; i++) {
+        pacer_wait();
+        tinygl_update();
+    }
+}
+
+static void init_led_matrix(void)
+{
+    /* Initialise LED matrix pins.  */
+    for (int i = 0; i < 5; i++) {
+        pio_config_set(cols[i], PIO_OUTPUT_HIGH);
+    }
+    for (int i = 0; i < 7; i++) {
+        pio_config_set(rows[i], PIO_OUTPUT_HIGH);
+    }
+}
+
+static void blue_led (void) 
+{
+    //freezes program, use for debugging
+    /* Initialise port to drive LED 1.  */
+    DDRC |= (1 << 2);
+
+    while (1)
+    {
+        /* Set port to turn LED 1 on.  */
+        PORTC |= (1 << 2);
+    }
+}
+
 
 int main (void)
 {
@@ -192,63 +263,80 @@ int main (void)
     pacer_init(PACER_RATE);
     navswitch_init();
     ir_uart_init();
-
-    tinygl_init (PACER_RATE);
-    tinygl_font_set (&font5x7_1);
-    tinygl_text_speed_set (MESSAGE_RATE);
-    tinygl_text ("PONG ");
-    tinygl_text_mode_set (TINYGL_TEXT_MODE_SCROLL);
-
-    /* Initialise LED matrix pins.  */
-    for (int i = 0; i < 5; i++) {
-        pio_config_set(cols[i], PIO_OUTPUT_HIGH);
-    }
-    for (int i = 0; i < 7; i++) {
-        pio_config_set(rows[i], PIO_OUTPUT_HIGH);
-    }
-
     paddle_init();
-    run_start_menu(); //will wait until game is being started
-    uint8_t game_state = run_paddle_only(bitmap); //display paddle only until someone fires a ball
-    Ball ball;
-    if (game_state == 1) {
-        //other player is starting. Initialise ball to be offscreen and wait for transmission
-        ball_init(&ball, 0, 5, 0, 0, 0);
-    } else {
-        //we just started the game. Shoot a ball
-        uint8_t paddle_loc = get_paddle_location();
-        ball_init(&ball, paddle_loc, 1, 0, 1, 1);
-    }
     
-    get_bitmap(bitmap, ball);
-    get_paddle_bitmap(bitmap);
+    init_led_matrix();
+
+    run_start_menu(); //will wait until game is being started
+    
+    Ball ball;
+    uint8_t game_state;
     uint8_t updateBallCount = 0;
-    while (1) {
-        pacer_wait ();
-        move_paddle();
-        current_column = update_display(bitmap, current_column);
+    uint8_t game_over = 0;
+    uint8_t round_over;
+    char score = '0';
+    char opponent_score = '0';
+    
+    while (!game_over) {
+        init_led_matrix();
+        game_state = run_paddle_only(bitmap); //display paddle only until someone fires a ball
+        initialise_ball(&ball, game_state);
+        get_bitmap(bitmap, ball);
+        get_paddle_bitmap(bitmap);
+        round_over = 0;
+        while (!round_over) {
+            pacer_wait();
+            move_paddle();
+            current_column = update_display(bitmap, current_column);
 
-        updateBallCount++;
-        //if the ball is on screen and the timer is right, update location
-        if (ball.on_screen) {
-            if (updateBallCount > 100) {
-                updateBallCount = 0;
-                update_location(&ball, get_paddle_location());
-                get_bitmap(bitmap, ball);
+            updateBallCount++;
+            //if the ball is on screen and the timer is right, update location
+            if (ball.on_screen) {
+                if (updateBallCount > 100) {
+                    updateBallCount = 0;
+                    update_location(&ball, get_paddle_location());
+                    get_bitmap(bitmap, ball);
 
-                if (!ball.on_screen) {
-                    //if ball just moved off screen, transmit relevant info
-                    transmit_ball(&ball);
+                    if (!ball.on_screen) {
+                        //if ball just moved off screen, transmit relevant info
+                        transmit_ball(&ball);
+                    } else if (ball.dead) {
+                        //just lost the round
+                        transmit_ball(&ball);
+                        round_over = 1;
+                        opponent_score++;
+                    }
+                }
+            } else {
+                //listen constantly for transmissions while the ball is offscreen
+                receive_ball(&ball);
+                if (ball.dead) {
+                    round_over = 1;
+                    score++;
+                    //blue_led();
+                } else if (ball.on_screen) {
+                    //reset ball timer
+                    updateBallCount = 0;
+                    get_bitmap(bitmap, ball);
                 }
             }
-        } else {
-            //listen constantly for transmissions while the ball is offscreen
-            receive_ball(&ball);
-            if (ball.on_screen) {
-                //reset ball timer
-                updateBallCount = 0;
-                get_bitmap(bitmap, ball);
-            }
         }
+        //display current score
+        display_character(score);
+        if (score == WINNING_SCORE) {
+            //game over, we won
+            game_over = 1;
+            scroll_text("WINNER :) ");
+        } else if (opponent_score == WINNING_SCORE) {
+            //game over, we lost
+            game_over = 1;
+            scroll_text("LOSER :( ");
+        }
+    }
+    while(1)
+    {
+        //display winner/loser on repeat until finished
+        pacer_wait();
+        tinygl_update();
     }
 }
