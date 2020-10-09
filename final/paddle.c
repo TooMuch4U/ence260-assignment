@@ -26,18 +26,19 @@ void paddle_init(Paddle* paddle)
     @param bitmap bitmap array for ledmat*/
 void get_paddle_bitmap(Paddle* paddle, uint8_t* bitmap)
 {
-    //TODO GET RID OF THESE MAGIC NUMBERS
-    bitmap[4] = 0;
-    bitmap[4] |= (1 << (6-paddle->pos));
+    bitmap[PADDLE_COL] = 0;
+    bitmap[PADDLE_COL] |= (1 << ((PADDLE_LIMIT_RIGHT - paddle->pos));
 
-    // Check if it's at the left side of the screen
-    if (paddle->pos > 0) {
-        bitmap[4] |= (1 << (7 - paddle->pos));
+    // Check if it's not at the left side of the screen
+    if (paddle->pos > PADDLE_LIMIT_LEFT) {
+        // Set the bit representing the left side of the paddle
+        bitmap[PADDLE_COL] |= (1 << (PADDLE_LIMIT_RIGHT - paddle->pos + 1));
     }
 
-    // Check if it's at the right side of the screen
-    if (paddle->pos < 6) {
-        bitmap[4] |= (1 << (5 - paddle->pos));
+    // Check if it's not at the right side of the screen
+    if (paddle->pos < PADDLE_LIMIT_RIGHT) {
+        // Set the bit representing the right side of the paddle
+        bitmap[PADDLE_COL] |= (1 << (PADDLE_LIMIT_RIGHT - paddle->pos - 1));
     }
 }
 
@@ -46,7 +47,7 @@ void get_paddle_bitmap(Paddle* paddle, uint8_t* bitmap)
 void paddle_move_left(Paddle* paddle)
 {
     // Check that the paddle isn't at the far limit yet
-    if (paddle->pos > PADDLE_LEFT_LIMIT) {
+    if (paddle->pos > PADDLE_LIMIT_RIGHT) {
         paddle->pos--;
     }
 }
@@ -56,7 +57,7 @@ void paddle_move_left(Paddle* paddle)
 void paddle_move_right(Paddle* paddle)
 {
     // Check the paddle isn't at the right limit
-    if (paddle->pos < PADDLE_RIGHT_LIMIT) {
+    if (paddle->pos < PADDLE_LIMIT_LEFT) {
         paddle->pos++;
     }
 }
