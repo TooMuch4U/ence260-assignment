@@ -90,6 +90,7 @@ void scroll_text(char* text)
 void display_character (char character)
 {
     char buffer[2];
+    tinygl_font_set (&font3x5_1);
     buffer[0] = character;
     buffer[1] = '\0';
     tinygl_text (buffer);

@@ -15,9 +15,10 @@
 #include "tinygl.h"
 #include "system.h"
 #include "../fonts/font5x7_1.h"
+#include "../fonts/font3x5_1.h"
 
 
-#define PACER_RATE 700
+#define PACER_RATE 600
 #define MESSAGE_RATE 10
 
 /** Initialise the columns of the led matrix: */

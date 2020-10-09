@@ -54,7 +54,12 @@ void receive_ball (Ball* ball)
             int8_t x_dir = decode(encoded_x_dir) - DIR_OFFSET;
 
             ball->x = x_coord;
-            ball->direction_x = x_dir;
+            if (x_dir < LEFT || x_dir > RIGHT) {
+                //transmission got messed up, default to straight down
+                ball->direction_x = STRAIGHT;
+            } else {
+                ball->direction_x = x_dir;
+            }
 
             //init y values
             ball->y = HEIGHT - 1;

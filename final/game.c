@@ -50,7 +50,6 @@ typedef struct {
 static void run_start_menu (Game* game)
 {
     // scroll the start of game text until one player starts paddle screen
-    //scroll_text("PONG ");
     tinygl_update();
     // Check for navswitch presses
     navswitch_update();
@@ -69,6 +68,7 @@ static void run_start_menu (Game* game)
         }
     }
 }
+
 
 /** Interpret navswitch input to update paddle location:
     @param paddle a pointer to the paddle object */
@@ -241,7 +241,6 @@ int main (void)
 
     while (1) {
         pacer_wait();
-        //tinygl_update();
         switch(game.game_mode) {
             case START_MENU :
                 run_start_menu(&game);

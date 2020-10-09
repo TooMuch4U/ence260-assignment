@@ -19,7 +19,7 @@ all: game.out
 game.o: game.c ../../drivers/avr/system.h ../../drivers/display.h ../../utils/pacer.h ../../drivers/navswitch.h ../../drivers/avr/ir_uart.h  pong_display.h communications.h ball.h paddle.h 
 	$(CC) -c $(CFLAGS) $< -o $@
 
-pong_display.o: pong_display.c ../../drivers/avr/pio.h ../../drivers/display.h ../../fonts/font5x7_1.h ../../utils/font.h ../../utils/pacer.h pong_display.h
+pong_display.o: pong_display.c ../../drivers/avr/pio.h ../../drivers/display.h ../../fonts/font5x7_1.h ../../fonts/font3x5_1.h ../../utils/font.h ../../utils/pacer.h pong_display.h
 
 system.o: ../../drivers/avr/system.c ../../drivers/avr/system.h
 	$(CC) -c $(CFLAGS) $< -o $@
