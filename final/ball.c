@@ -53,7 +53,7 @@ static void update_x(Ball* ball, uint8_t hit_paddle, uint8_t paddle)
         ball->x--;
     }else if (hit_paddle) {
         //check that paddle isn't colliding with wall as well as updating direction
-        ball->direction_x = 0;
+        ball->direction_x = STRAIGHT;
         if (ball->x == paddle - 1 && ball->x != LEFT_WALL) {
             //hit left side of paddle - bounce off left
             ball->x--;
@@ -78,7 +78,7 @@ static void update_x(Ball* ball, uint8_t hit_paddle, uint8_t paddle)
 static void update_y (Ball* ball, uint8_t hit_paddle)
 {
     if (has_hit_ground(ball)) {
-        ball->dead = 1;
+        ball->dead = DEAD;
     } else if (hit_paddle) {
         //ball hit the paddle
         ball->y++;
@@ -103,7 +103,7 @@ void ball_init (Ball* ball, uint8_t x, uint8_t y, int8_t x_dir, int8_t y_dir, ui
     ball->direction_x = x_dir;
     ball->direction_y = y_dir;
     ball->on_screen = on_screen;
-    ball->dead = 0; //set ball to not be dead initially
+    ball->dead = ALIVE; //set ball to not be dead initially
 }
 
 /** Update location of ball:
@@ -115,7 +115,7 @@ void update_location(Ball* ball, uint8_t paddle)
     update_x(ball, hit_paddle, paddle);
     update_y(ball, hit_paddle);
     if (has_gone_off_screen(ball)) {
-        ball->on_screen = 0;
+        ball->on_screen = OFF_SCREEN;
     }
 }
 
@@ -124,15 +124,15 @@ void update_location(Ball* ball, uint8_t paddle)
     @param ball pointer to ball struct */
 void get_bitmap(uint8_t bitmap[], Ball* ball)
 {
-    uint8_t paddle = bitmap[4];
+    uint8_t paddle = bitmap[PADDLE_COL];
     for (uint8_t i = 0; i < HEIGHT; i++) {
         if (i != (HEIGHT - 1 - ball->y)) {
-            bitmap[i] = 0x00;
+            bitmap[i] = BLANK;
         } else {
             bitmap[i] = 1 << (RIGHT_WALL - ball->x);
         }
     }
-    bitmap[4] |= paddle; //keep paddle bits
+    bitmap[PADDLE_COL] |= paddle; //keep paddle bits
 }
 
 

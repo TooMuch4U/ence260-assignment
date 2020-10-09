@@ -21,6 +21,14 @@
 #define UP 1
 #define DOWN -1
 
+#define DEAD 1
+#define ALIVE 0
+#define ON_SCREEN 1
+#define OFF_SCREEN 0
+
+#define PADDLE_COL 4
+#define BLANK 0x00
+
 /**define data associated with ball */
 typedef struct ball_s Ball;
 
