@@ -27,6 +27,7 @@ void paddle_init(Paddle* paddle)
 void get_paddle_bitmap(Paddle* paddle, uint8_t* bitmap)
 {
     bitmap[PADDLE_COL] = 0;
+    // Set the bit representing the middle of the paddle
     bitmap[PADDLE_COL] |= (1 << ((PADDLE_LIMIT_RIGHT - paddle->pos));
 
     // Check if it's not at the left side of the screen
@@ -46,7 +47,7 @@ void get_paddle_bitmap(Paddle* paddle, uint8_t* bitmap)
     @param paddle pointer to paddle struct */
 void paddle_move_left(Paddle* paddle)
 {
-    // Check that the paddle isn't at the far limit yet
+    // Check that the paddle isn't at the left limit
     if (paddle->pos > PADDLE_LIMIT_RIGHT) {
         paddle->pos--;
     }
