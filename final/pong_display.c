@@ -1,7 +1,10 @@
-//
-// Created by tcr59 on 26/09/20.
-// Last edited by ech105 on 8/10/20
-//
+/** @file pong_display.c
+ * @author Emma Hogan, Tom Rizzi
+ * @date 26 September 2020
+ * @brief ledmat screen display module
+ * last edited 10 October 2020 by Emma Hogan
+ */
+
 
 #include "pong_display.h"
 
@@ -20,7 +23,7 @@ static const pio_t cols[] = {
     LEDMAT_COL4_PIO, LEDMAT_COL5_PIO
 };
 
-/** initialise the columns of the led matrix */
+/** Initialise the columns of the led matrix: */
 void init_led_matrix(void)
 {
     /* Initialise LED matrix pins.  */
@@ -33,7 +36,9 @@ void init_led_matrix(void)
 }
 
 static pio_t prev;
-/** Flash the correct bit pattern for current column in led matrix */
+/** Flash the correct bit pattern for current column in led matrix:
+    @param row_pattern the bitmap of which leds we want to light
+    @param current_column, the index of the column we are currently flashing */
 void display_column (uint8_t row_pattern, uint8_t current_column)
 {
     pio_output_high(cols[prev]);
@@ -50,7 +55,10 @@ void display_column (uint8_t row_pattern, uint8_t current_column)
 }
 
 
-/** update the led matrix to display given bitmap, flashing 1 column at a time */
+/** Update the led matrix to display given bitmap, flashing 1 column at a time:
+    @param bitmap the pattern we want to light up
+    @param current_column the column we are currently flashing
+    @return an integer representing the next column to flash */
 uint8_t update_display (uint8_t bitmap[], uint8_t current_column)
 {
     // Update the display
@@ -65,7 +73,8 @@ uint8_t update_display (uint8_t bitmap[], uint8_t current_column)
 }
 
 
-/** setup tinygl to display given text in scrolling mode */
+/** Setup tinygl to display given text in scrolling mode:
+    @param text, the characters to display */
 void scroll_text(char* text)
 {
     tinygl_init (PACER_RATE);
@@ -75,13 +84,14 @@ void scroll_text(char* text)
     tinygl_text_mode_set (TINYGL_TEXT_MODE_SCROLL);
 }
 
-/** flash a single character onto the screen for a small amount of time */
+
+/** Flash a single character onto the screen:
+    @param character, the character to display */
 void display_character (char character)
 {
     char buffer[2];
     buffer[0] = character;
     buffer[1] = '\0';
-    //tinygl_text_mode_set (TINYGL_TEXT_MODE_STEP); //kind of flash onto screen
     tinygl_text (buffer);
     tinygl_update();
 }
