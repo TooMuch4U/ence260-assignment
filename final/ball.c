@@ -5,7 +5,9 @@
  * last edited 9 October 2020 by Emma Hogan
  */
 
+
 #include "ball.h"
+
 
 /** Return true if ball has hit the paddle:
     @param ball pointer to ball struct 
@@ -21,6 +23,7 @@ static uint8_t has_hit_paddle (Ball* ball, uint8_t paddle)
     return 0;
 }
 
+
 /** Return true if ball has flown off screen:
     @param ball pointer to ball struct 
     @return 1 if ball is offscreen else 0*/
@@ -29,6 +32,7 @@ static uint8_t has_gone_off_screen (Ball* ball)
     return ball->y >= HEIGHT;
 }
 
+
 /** Return true if ball has hit the ground:
     @param ball pointer to ball struct 
     @return 1 if ball is on ground else 0*/
@@ -36,6 +40,7 @@ static uint8_t has_hit_ground (Ball* ball)
 {
     return ball->y == GROUND && ball->direction_y == DOWN;
 }
+
 
 /** Update x component of balls location:
     @param ball pointer to ball struct 
@@ -72,6 +77,7 @@ static void update_x (Ball* ball, uint8_t hit_paddle, uint8_t paddle)
     }
 }
 
+
 /** Update y component of balls location:
     @param ball pointer to ball struct 
     @param hit_paddle 1 if ball has hit paddle, otherwise 0*/
@@ -88,6 +94,7 @@ static void update_y (Ball* ball, uint8_t hit_paddle)
         ball->y += ball->direction_y;
     }
 }
+
 
 /** Initialise ball structure:
     @param ball pointer to struct being initialised 
@@ -106,6 +113,7 @@ void ball_init (Ball* ball, uint8_t x, uint8_t y, int8_t x_dir, int8_t y_dir, ui
     ball->dead = ALIVE; //set ball to not be dead initially
 }
 
+
 /** Update location of ball:
     @param ball pointer to ball struct 
     @param paddle x coordinate of centre of paddle*/
@@ -118,6 +126,7 @@ void update_location (Ball* ball, uint8_t paddle)
         ball->on_screen = OFF_SCREEN;
     }
 }
+
 
 /** Return bitmap array representing both ball and paddle:
     @param bitmap current bitmap array to update with new ball location
