@@ -2,7 +2,7 @@
  * @author Emma Hogan, Tom Rizzi
  * @date 26 September 2020
  * @brief ledmat screen display module
- * last edited 10 October 2020 by Emma Hogan
+ * last edited 11 October 2020 by Emma Hogan
  */
 
 
@@ -23,6 +23,7 @@ static const pio_t cols[] = {
     LEDMAT_COL4_PIO, LEDMAT_COL5_PIO
 };
 
+
 /** Initialise the columns of the led matrix: */
 void init_led_matrix (void)
 {
@@ -34,6 +35,7 @@ void init_led_matrix (void)
         pio_config_set(rows[i], PIO_OUTPUT_HIGH);
     }
 }
+
 
 static pio_t prev;
 /** Flash the correct bit pattern for current column in led matrix:

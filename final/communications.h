@@ -2,8 +2,9 @@
  * @author Emma Hogan, Tom Rizzi
  * @date 9 October 2020
  * @brief IR communications module
- * last edited 9 October 2020 by Emma Hogan
+ * last edited 11 October 2020 by Emma Hogan
  */
+
 
 #ifndef COMMUNICATIONS_H
 #define COMMUNICATIONS_H
@@ -21,9 +22,11 @@
     @param ball struct containing ball data*/
 void transmit_ball (Ball* ball);
 
-/** inform other microcontroller that game has been started 
+
+/** inform other microcontroller that game has been started
     @param mode 1 for start game, 2 for start round*/
 void inform_start (uint8_t mode);
+
 
 /** Receive relevant ball information from other device
     @param ball struct containing ball data*/

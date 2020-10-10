@@ -2,8 +2,9 @@
  * @author Emma Hogan, Tom Rizzi
  * @date 27 September 2020
  * @brief communications encoding module
- * last edited 10 October 2020 by Emma Hogan
+ * last edited 11 October 2020 by Emma Hogan
  */
+
 
 #include "coder.h"
 
@@ -48,6 +49,7 @@ static uint8_t multiplication_table[CODE_LENGTH][CODE_LENGTH] = {
     {0,3,1,2},
 };
 
+
 /** Similar for addition */
 static uint8_t addition_table[CODE_LENGTH][CODE_LENGTH] = {
     {0,1,2,3},
@@ -56,11 +58,13 @@ static uint8_t addition_table[CODE_LENGTH][CODE_LENGTH] = {
     {3,2,1,0}
 };
 
+
 /** Linear map to generate codewords from messages */
 static uint8_t generator_matrix[MESSAGE_LENGTH][CODE_LENGTH] = {
     {1,1,1,1},
     {0,1,2,3}
 };
+
 
 /** Parity check matrix to calculated syndromes from received messages */
 static uint8_t transposed_parity_check_matrix[CODE_LENGTH][PARITY_DIM] = {
@@ -69,6 +73,7 @@ static uint8_t transposed_parity_check_matrix[CODE_LENGTH][PARITY_DIM] = {
     {1,2},
     {1,3}
 };
+
 
 /** Representative vectors for each syndrome. Indexed by decimal value of syndrome
 interpreted as a quaternary value */
@@ -91,8 +96,9 @@ static uint8_t representatives[NUM_SYNDROMES][CODE_LENGTH] = {
     {0,3,0,0}
 };
 
+
 /** multiply a message vector by a generator matrix with terms over F_4:
-    @param vector represented as an array to be LHS of product 
+    @param vector represented as an array to be LHS of product
     @param matrix, a 2D array to be RHS of product
     @param result, an array in which to place result of multiplication */
 static void multiply_generator(uint8_t vector[], uint8_t matrix[][CODE_LENGTH], uint8_t result[])
@@ -108,8 +114,9 @@ static void multiply_generator(uint8_t vector[], uint8_t matrix[][CODE_LENGTH], 
     }
 }
 
+
 /** multiply a vector by a parity check matrix with terms over F_4:
-    @param vector represented as an array to be LHS of product 
+    @param vector represented as an array to be LHS of product
     @param matrix, a 2D array to be RHS of product
     @param result, an array in which to place result of multiplication */
 static void multiply_parity_check(uint8_t vector[], uint8_t matrix[][PARITY_DIM], uint8_t result[])
@@ -124,9 +131,10 @@ static void multiply_parity_check(uint8_t vector[], uint8_t matrix[][PARITY_DIM]
     }
 }
 
+
 /** subtract 2 vectors over F_4:
-    @param vector1 represented as an array for LHS of subtraction 
-    @param vector2 represented as an array for RHS of subtraction 
+    @param vector1 represented as an array for LHS of subtraction
+    @param vector2 represented as an array for RHS of subtraction
     @param result, an array in which to place result of subtraction */
 static void subtract_vectors(uint8_t vector1[], uint8_t vector2[], uint8_t result[])
 {
@@ -135,6 +143,7 @@ static void subtract_vectors(uint8_t vector1[], uint8_t vector2[], uint8_t resul
         result[i] = addition_table[vector1[i]][vector2[i]];
     }
 }
+
 
 /** convert the codeword into an ascii characters for ease of transmission:
     @param vector represented as an array to be converted into a char
@@ -149,6 +158,7 @@ static uint8_t convert_to_char(uint8_t vector[])
     return c;
 }
 
+
 /** convert the transmitted ascii character back into a vector (array) over F4:
     @param c the transmitted character
     @param vector represented as an array
@@ -159,6 +169,7 @@ static void convert_to_vector(uint8_t c, uint8_t vector[])
         vector[i] = c >> (8 - 2 * (i + 1)) & (0x3);
     }
 }
+
 
 /** encode an arbitrary message of length 4 in bits into a 1 char long string via reed-solomon code:
     @param message, an integer between 0 and 15
@@ -179,6 +190,7 @@ uint8_t encode(uint8_t message)
 
     return transmission;
 }
+
 
 /** Use reed-solomon code to decode and error correct received transmission:
     @param transmission, the received ascii character
