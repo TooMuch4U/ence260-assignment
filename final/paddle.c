@@ -12,14 +12,14 @@
 /** Returns the paddles current position:
     @param paddle pointer to paddle struct
     @return int of paddle position */
-uint8_t get_paddle_location(Paddle* paddle) {
+uint8_t get_paddle_location (Paddle* paddle) {
     return paddle->pos;
 };
 
 
 /** Initialise the paddle struct:
     @param paddle pointer to paddle struct */
-void paddle_init(Paddle* paddle)
+void paddle_init (Paddle* paddle)
 {
     paddle->pos = PADDLE_START_POS;
 }
@@ -28,7 +28,7 @@ void paddle_init(Paddle* paddle)
 /** Returns a bitmap of the current paddle position:
     @param paddle pointer to paddle struct 
     @param bitmap bitmap array for ledmat*/
-void get_paddle_bitmap(Paddle* paddle, uint8_t* bitmap)
+void get_paddle_bitmap (Paddle* paddle, uint8_t* bitmap)
 {
     bitmap[PADDLE_COL] = 0;
     // Set the bit representing the middle of the paddle
@@ -50,7 +50,7 @@ void get_paddle_bitmap(Paddle* paddle, uint8_t* bitmap)
 
 /** Move the paddle one unit left if possible:
     @param paddle pointer to paddle struct */
-void paddle_move_left(Paddle* paddle)
+void paddle_move_left (Paddle* paddle)
 {
     // Check that the paddle isn't at the left limit
     if (paddle->pos > PADDLE_LIMIT_LEFT) {
@@ -61,7 +61,7 @@ void paddle_move_left(Paddle* paddle)
 
 /** Move the paddle one unit right if possible:
     @param paddle pointer to paddle struct */
-void paddle_move_right(Paddle* paddle)
+void paddle_move_right (Paddle* paddle)
 {
     // Check the paddle isn't at the right limit
     if (paddle->pos < PADDLE_LIMIT_RIGHT) {

@@ -54,13 +54,13 @@ void ball_init (Ball* ball, uint8_t x, uint8_t y, int8_t x_dir, int8_t y_dir, ui
 /** Update location of ball:
     @param ball pointer to struct being initialised 
     @param paddle x coordinate of centre of paddle*/
-void update_location(Ball* ball, uint8_t paddle);
+void update_location (Ball* ball, uint8_t paddle);
 
 
 /** Return bitmap array representing both ball and paddle:
     @param bitmap current bitmap array to update with new ball location
     @param ball pointer to ball struct */
-void get_bitmap(uint8_t bitmap[], Ball* ball);
+void get_bitmap (uint8_t bitmap[], Ball* ball);
 
 
 #endif

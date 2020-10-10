@@ -32,7 +32,7 @@ static uint8_t has_gone_off_screen (Ball* ball)
 /** Return true if ball has hit the ground:
     @param ball pointer to ball struct 
     @return 1 if ball is on ground else 0*/
-static uint8_t has_hit_ground(Ball* ball)
+static uint8_t has_hit_ground (Ball* ball)
 {
     return ball->y == GROUND && ball->direction_y == DOWN;
 }
@@ -41,7 +41,7 @@ static uint8_t has_hit_ground(Ball* ball)
     @param ball pointer to ball struct 
     @param hit_paddle 1 if ball has hit paddle, otherwise 0
     @param paddle x coordinate of centre of paddle*/
-static void update_x(Ball* ball, uint8_t hit_paddle, uint8_t paddle)
+static void update_x (Ball* ball, uint8_t hit_paddle, uint8_t paddle)
 {
     if (ball->x == LEFT_WALL && ball->direction_x == LEFT) {
         //hit the left wall
@@ -109,7 +109,7 @@ void ball_init (Ball* ball, uint8_t x, uint8_t y, int8_t x_dir, int8_t y_dir, ui
 /** Update location of ball:
     @param ball pointer to ball struct 
     @param paddle x coordinate of centre of paddle*/
-void update_location(Ball* ball, uint8_t paddle)
+void update_location (Ball* ball, uint8_t paddle)
 {
     uint8_t hit_paddle = has_hit_paddle(ball, paddle);
     update_x(ball, hit_paddle, paddle);
@@ -122,7 +122,7 @@ void update_location(Ball* ball, uint8_t paddle)
 /** Return bitmap array representing both ball and paddle:
     @param bitmap current bitmap array to update with new ball location
     @param ball pointer to ball struct */
-void get_bitmap(uint8_t bitmap[], Ball* ball)
+void get_bitmap (uint8_t bitmap[], Ball* ball)
 {
     uint8_t paddle = bitmap[PADDLE_COL];
     for (uint8_t i = 0; i < HEIGHT; i++) {

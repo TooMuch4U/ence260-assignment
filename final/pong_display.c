@@ -24,7 +24,7 @@ static const pio_t cols[] = {
 };
 
 /** Initialise the columns of the led matrix: */
-void init_led_matrix(void)
+void init_led_matrix (void)
 {
     /* Initialise LED matrix pins.  */
     for (int i = 0; i < 5; i++) {
@@ -75,7 +75,7 @@ uint8_t update_display (uint8_t bitmap[], uint8_t current_column)
 
 /** Setup tinygl to display given text in scrolling mode:
     @param text, the characters to display */
-void scroll_text(char* text)
+void scroll_text (char* text)
 {
     tinygl_init (PACER_RATE);
     tinygl_font_set (&font5x7_1);

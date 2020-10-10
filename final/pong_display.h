@@ -22,7 +22,7 @@
 #define MESSAGE_RATE 10
 
 /** Initialise the columns of the led matrix: */
-void init_led_matrix(void);
+void init_led_matrix (void);
 
 /** Flash the correct bit pattern for current column in led matrix:
     @param row_pattern the bitmap of which leds we want to light
@@ -37,7 +37,7 @@ uint8_t update_display (uint8_t bitmap[], uint8_t current_column);
 
 /** Setup tinygl to display given text in scrolling mode:
     @param text, the characters to display */
-void scroll_text(char* text);
+void scroll_text (char* text);
 
 /** Flash a single character onto the screen:
     @param character, the character to display */
