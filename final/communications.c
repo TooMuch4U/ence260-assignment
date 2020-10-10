@@ -31,7 +31,7 @@ void transmit_ball (Ball* ball)
 }
 
 
-/** inform other microcontroller that game has been started 
+/** inform other microcontroller that game has been started
     @param mode 1 for start game, 2 for start round*/
 void inform_start (uint8_t mode)
 {
@@ -49,7 +49,7 @@ void receive_ball (Ball* ball)
     if (ir_uart_read_ready_p()) {
         encoded_x_coord = ir_uart_getc();
         uint8_t x_coord = decode(encoded_x_coord) - COORD_OFFSET;
-        if (x_coord >= LEFT_WALL && x_coord <= RIGHT_WALL) { //we are receiving a transmission of ball location
+        if (x_coord <= RIGHT_WALL) { //we are receiving a transmission of ball location
             encoded_x_dir = ir_uart_getc();
             int8_t x_dir = decode(encoded_x_dir) - DIR_OFFSET;
 
