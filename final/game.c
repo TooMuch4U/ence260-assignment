@@ -21,7 +21,7 @@
 #define DISPLAY_RATE 250
 #define DISPLAY_CYCLES 10
 #define MESSAGE_RATE 10
-#define WINNING_SCORE '5'
+#define WINNING_SCORE '3'
 #define START_MENU 0
 #define PADDLE_MODE 1
 #define PLAY_MODE 2
