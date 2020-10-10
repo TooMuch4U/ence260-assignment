@@ -48,7 +48,7 @@ void get_paddle_bitmap(Paddle* paddle, uint8_t* bitmap)
 void paddle_move_left(Paddle* paddle)
 {
     // Check that the paddle isn't at the left limit
-    if (paddle->pos > PADDLE_LIMIT_RIGHT) {
+    if (paddle->pos > PADDLE_LIMIT_LEFT) {
         paddle->pos--;
     }
 }
@@ -58,7 +58,7 @@ void paddle_move_left(Paddle* paddle)
 void paddle_move_right(Paddle* paddle)
 {
     // Check the paddle isn't at the right limit
-    if (paddle->pos < PADDLE_LIMIT_LEFT) {
+    if (paddle->pos < PADDLE_LIMIT_RIGHT) {
         paddle->pos++;
     }
 }
