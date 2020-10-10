@@ -130,7 +130,7 @@ static void multiply_parity_check (uint8_t vector[], uint8_t matrix[][PARITY_DIM
         sum = 0;
         for (uint8_t j = 0; j < CODE_LENGTH; j++) {
             //interpret multiplication and addition over F_4
-            product = multiplication_table[vector[j]][matrix[j][i]]
+            product = multiplication_table[vector[j]][matrix[j][i]];
             sum = addition_table[sum][product];
         }
         result[i] = sum;
