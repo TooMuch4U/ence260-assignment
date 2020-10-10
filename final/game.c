@@ -188,18 +188,23 @@ static void play_round (Paddle* paddle, Ball* ball, Game* game, uint8_t bitmap[]
 static void check_display_timeout (Game* game)
 {
     if (game->display_counter > DISPLAY_RATE) {
+        // count another timer cycle
         game->display_cycle++;
     }
     if (game->display_cycle > DISPLAY_CYCLES) {
+        // have waited intended number of timer cycles
         game->display_counter = 0;
         game->display_cycle = 0;
         if (game->score == WINNING_SCORE) {
+            // have won the game, scroll winning text
             game->game_mode = GAME_OVER_MODE;
             scroll_text("WINNER :) ");
         } else if (game->opponent_score == WINNING_SCORE) {
+            // have lost the game, scroll losing text
             game->game_mode = GAME_OVER_MODE;
             scroll_text("LOSER :( ");
         } else {
+            // return to game play
             game->game_mode = PADDLE_MODE;
         }
     }
@@ -219,8 +224,8 @@ static void initialise (void)
 
 int main (void)
 {
+    // initialise game play variables and structs
     initialise();
-
     uint8_t bitmap[HEIGHT] = {0};
     Paddle paddle;
     paddle_init(&paddle);
@@ -236,6 +241,7 @@ int main (void)
         INITIAL_COUNTER_VALUE
         };
 
+    //set scroll text for main menu
     scroll_text("PONG: PUSH TO START ");
 
     while (1) {
@@ -257,7 +263,7 @@ int main (void)
             case DISPLAY_SCORE_MODE :
                 game.display_counter++;
                 display_character(game.score);
-                check_display_timeout(&game);
+                check_display_timeout(&game); //check if score displayed for long enough to return to game play
                 break;
 
             case GAME_OVER_MODE :
