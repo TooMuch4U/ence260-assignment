@@ -28,7 +28,7 @@ void get_paddle_bitmap(Paddle* paddle, uint8_t* bitmap)
 {
     bitmap[PADDLE_COL] = 0;
     // Set the bit representing the middle of the paddle
-    bitmap[PADDLE_COL] |= (1 << ((PADDLE_LIMIT_RIGHT - paddle->pos));
+    bitmap[PADDLE_COL] |= (1 << (PADDLE_LIMIT_RIGHT - paddle->pos));
 
     // Check if it's not at the left side of the screen
     if (paddle->pos > PADDLE_LIMIT_LEFT) {
