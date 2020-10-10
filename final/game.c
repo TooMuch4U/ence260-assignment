@@ -140,7 +140,6 @@ static void run_paddle_only (Ball* ball, Paddle* paddle, Game* game, uint8_t bit
 }
 
 
-
 /** Run the game logic during a round - ball and paddle movement, waiting for a game loss event:
     @param paddle a pointer to the paddle object
     @param ball a pointer to the ball object
