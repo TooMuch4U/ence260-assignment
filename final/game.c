@@ -41,7 +41,7 @@ typedef struct {
     uint8_t game_mode; //game modes: START_MENU = 0, PADDLE_MODE = 1, PLAY_MODE = 2, DISPLAY_SCORE_MODE = 3, GAME_OVER_MODE = 4
     uint8_t ball_counter;
     uint8_t column_counter;
-    uint8_t display_counter; 
+    uint8_t display_counter;
     uint8_t display_cycle; //to count number of passed clock cycles
 } Game;
 
@@ -139,20 +139,6 @@ static void run_paddle_only (Ball* ball, Paddle* paddle, Game* game, uint8_t bit
     }
 }
 
-
-/** for debugging purposes */
-static void blue_led (void)
-{
-    //freezes program, use for debugging
-    /* Initialise port to drive LED 1.  */
-    DDRC |= (1 << 2);
-
-    while (1)
-    {
-        /* Set port to turn LED 1 on.  */
-        PORTC |= (1 << 2);
-    }
-}
 
 
 /** Run the game logic during a round - ball and paddle movement, waiting for a game loss event:

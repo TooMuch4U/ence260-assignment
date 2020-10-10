@@ -16,7 +16,7 @@ all: game.out
 
 
 # Compile: create object files from C source files.
-game.o: game.c ../../drivers/avr/system.h ../../drivers/display.h ../../utils/pacer.h ../../drivers/navswitch.h ../../drivers/avr/ir_uart.h  pong_display.h communications.h ball.h paddle.h 
+game.o: game.c ../../drivers/avr/system.h ../../drivers/display.h ../../utils/pacer.h ../../drivers/navswitch.h ../../drivers/avr/ir_uart.h  pong_display.h communications.h ball.h paddle.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 pong_display.o: pong_display.c ../../drivers/avr/pio.h ../../drivers/display.h ../../fonts/font5x7_1.h ../../fonts/font3x5_1.h ../../utils/font.h ../../utils/pacer.h pong_display.h
@@ -65,7 +65,7 @@ tinygl.o: ../../utils/tinygl.c ../../drivers/avr/system.h ../../drivers/display.
 
 ledmat.o: ../../drivers/ledmat.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/ledmat.h
 	$(CC) -c $(CFLAGS) $< -o $@
-	
+
 communications.o: communications.c coder.h ball.h ../../drivers/avr/ir_uart.h communications.h
 
 coder.o: coder.c coder.h
@@ -90,5 +90,3 @@ clean:
 program: game.out
 	$(OBJCOPY) -O ihex game.out game.hex
 	dfu-programmer atmega32u2 erase; dfu-programmer atmega32u2 flash game.hex; dfu-programmer atmega32u2 start
-
-
