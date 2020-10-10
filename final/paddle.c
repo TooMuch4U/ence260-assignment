@@ -5,7 +5,9 @@
  * last edited 10 October 2020 by Emma Hogan
  */
 
+
 #include "paddle.h"
+
 
 /** Returns the paddles current position:
     @param paddle pointer to paddle struct
@@ -14,12 +16,14 @@ uint8_t get_paddle_location(Paddle* paddle) {
     return paddle->pos;
 };
 
+
 /** Initialise the paddle struct:
     @param paddle pointer to paddle struct */
 void paddle_init(Paddle* paddle)
 {
     paddle->pos = PADDLE_START_POS;
 }
+
 
 /** Returns a bitmap of the current paddle position:
     @param paddle pointer to paddle struct 
@@ -43,6 +47,7 @@ void get_paddle_bitmap(Paddle* paddle, uint8_t* bitmap)
     }
 }
 
+
 /** Move the paddle one unit left if possible:
     @param paddle pointer to paddle struct */
 void paddle_move_left(Paddle* paddle)
@@ -52,6 +57,7 @@ void paddle_move_left(Paddle* paddle)
         paddle->pos--;
     }
 }
+
 
 /** Move the paddle one unit right if possible:
     @param paddle pointer to paddle struct */

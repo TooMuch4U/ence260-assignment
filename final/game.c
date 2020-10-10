@@ -5,6 +5,7 @@
  * last edited 10 October 2020 by Emma Hogan
  */
 
+
 #include "system.h"
 #include "pacer.h"
 #include "ball.h"
@@ -179,6 +180,7 @@ static void play_round (Paddle* paddle, Ball* ball, Game* game, uint8_t bitmap[]
         }
     }
 }
+
 
 /** Display the updated score for some amount of time and then update game state to
     keep playing or move to a win/loss screen if relevant:
