@@ -97,46 +97,52 @@ static uint8_t representatives[NUM_SYNDROMES][CODE_LENGTH] = {
 };
 
 
-/** multiply a message vector by a generator matrix with terms over F_4:
+/** Multiply a message vector by a generator matrix with terms over F_4:
     @param vector represented as an array to be LHS of product
     @param matrix, a 2D array to be RHS of product
     @param result, an array in which to place result of multiplication */
-static void multiply_generator(uint8_t vector[], uint8_t matrix[][CODE_LENGTH], uint8_t result[])
+static void multiply_generator (uint8_t vector[], uint8_t matrix[][CODE_LENGTH], uint8_t result[])
 {
     uint8_t sum;
+    uint8_t product;
     for (uint8_t i = 0; i < CODE_LENGTH; i++) {
         //compute dot product of message and relevant column transpose
         sum = 0;
         for (uint8_t j = 0; j < MESSAGE_LENGTH; j++) {
-            sum = addition_table[sum][multiplication_table[vector[j]][matrix[j][i]]]; //interpret multiplication and addition over F_4
+            //interpret multiplication and addition over F_4
+            product = multiplication_table[vector[j]][matrix[j][i]];
+            sum = addition_table[sum][product];
         }
         result[i] = sum;
     }
 }
 
 
-/** multiply a vector by a parity check matrix with terms over F_4:
+/** Multiply a vector by a parity check matrix with terms over F_4:
     @param vector represented as an array to be LHS of product
     @param matrix, a 2D array to be RHS of product
     @param result, an array in which to place result of multiplication */
-static void multiply_parity_check(uint8_t vector[], uint8_t matrix[][PARITY_DIM], uint8_t result[])
+static void multiply_parity_check (uint8_t vector[], uint8_t matrix[][PARITY_DIM], uint8_t result[])
 {
     uint8_t sum;
+    uint8_t product;
     for (uint8_t i = 0; i < PARITY_DIM; i++) {
         sum = 0;
         for (uint8_t j = 0; j < CODE_LENGTH; j++) {
-            sum = addition_table[sum][multiplication_table[vector[j]][matrix[j][i]]]; //interpret multiplication and addition over F_4
+            //interpret multiplication and addition over F_4
+            product = multiplication_table[vector[j]][matrix[j][i]]
+            sum = addition_table[sum][product];
         }
         result[i] = sum;
     }
 }
 
 
-/** subtract 2 vectors over F_4:
+/** Subtract 2 vectors over F_4:
     @param vector1 represented as an array for LHS of subtraction
     @param vector2 represented as an array for RHS of subtraction
     @param result, an array in which to place result of subtraction */
-static void subtract_vectors(uint8_t vector1[], uint8_t vector2[], uint8_t result[])
+static void subtract_vectors (uint8_t vector1[], uint8_t vector2[], uint8_t result[])
 {
     for (uint8_t i = 0; i < CODE_LENGTH; i++) {
         // addition and subtraction are identical since 1 = -1 over F_4
@@ -145,10 +151,10 @@ static void subtract_vectors(uint8_t vector1[], uint8_t vector2[], uint8_t resul
 }
 
 
-/** convert the codeword into an ascii characters for ease of transmission:
+/** Convert the codeword into an ascii characters for ease of transmission:
     @param vector represented as an array to be converted into a char
     eg: [2,1,0,3] -> (10)(01)(00)(11) = 10010011 */
-static uint8_t convert_to_char(uint8_t vector[])
+static uint8_t convert_to_char (uint8_t vector[])
 {
     uint8_t c = 0;
     for (uint8_t i = 0; i < CODE_LENGTH; i++) {
@@ -159,11 +165,11 @@ static uint8_t convert_to_char(uint8_t vector[])
 }
 
 
-/** convert the transmitted ascii character back into a vector (array) over F4:
+/** Convert the transmitted ascii character back into a vector (array) over F4:
     @param c the transmitted character
     @param vector represented as an array
     eg: B = 01000010 -> (01)(00)(00)(10) = [1,0,0,2] */
-static void convert_to_vector(uint8_t c, uint8_t vector[])
+static void convert_to_vector (uint8_t c, uint8_t vector[])
 {
     for (int i = 0; i < CODE_LENGTH; i++) {
         vector[i] = c >> (8 - 2 * (i + 1)) & (0x3);
@@ -171,10 +177,10 @@ static void convert_to_vector(uint8_t c, uint8_t vector[])
 }
 
 
-/** encode an arbitrary message of length 4 in bits into a 1 char long string via reed-solomon code:
+/** Encode an arbitrary message of length 4 in bits into a 1 char long string via reed-solomon code:
     @param message, an integer between 0 and 15
     @return an integer representing the ascii encoding of the message */
-uint8_t encode(uint8_t message)
+uint8_t encode (uint8_t message)
 {
     //split message into 2 2 bit sequences
     uint8_t a = message >> 2;
@@ -195,7 +201,7 @@ uint8_t encode(uint8_t message)
 /** Use reed-solomon code to decode and error correct received transmission:
     @param transmission, the received ascii character
     @return an integer representing the most likely original message after error correcting */
-uint8_t decode(uint8_t transmission)
+uint8_t decode (uint8_t transmission)
 {
     uint8_t vector[CODE_LENGTH];
     uint8_t syndrome[MESSAGE_LENGTH];

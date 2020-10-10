@@ -185,7 +185,7 @@ static void play_round (Paddle* paddle, Ball* ball, Game* game, uint8_t bitmap[]
 /** Display the updated score for some amount of time and then update game state to
     keep playing or move to a win/loss screen if relevant:
     @param game a pointer to the game object */
-static void check_display_timeout(Game* game)
+static void check_display_timeout (Game* game)
 {
     if (game->display_counter > DISPLAY_RATE) {
         game->display_cycle++;
@@ -207,7 +207,7 @@ static void check_display_timeout(Game* game)
 
 
 /** Initialise each of the components needed for gameplay */
-static void initialise(void)
+static void initialise (void)
 {
     system_init ();
     pacer_init(PACER_RATE);
@@ -225,7 +225,17 @@ int main (void)
     Paddle paddle;
     paddle_init(&paddle);
     Ball ball;
-    Game game = {INITIAL_SCORE, INITIAL_SCORE, START_MENU, INITIAL_COUNTER_VALUE, INITIAL_COUNTER_VALUE, INITIAL_COUNTER_VALUE, INITIAL_COUNTER_VALUE};
+
+    Game game = {
+        INITIAL_SCORE,
+        INITIAL_SCORE,
+        START_MENU,
+        INITIAL_COUNTER_VALUE,
+        INITIAL_COUNTER_VALUE,
+        INITIAL_COUNTER_VALUE,
+        INITIAL_COUNTER_VALUE
+        };
+
     scroll_text("PONG ");
 
     while (1) {
