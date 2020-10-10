@@ -2,8 +2,9 @@
  * @author Emma Hogan, Tom Rizzi
  * @date 9 October 2020
  * @brief IR communications module
- * last edited 9 October 2020 by Emma Hogan
+ * last edited 11 October 2020 by Emma Hogan
  */
+
 
 #include "communications.h"
 
