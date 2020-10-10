@@ -236,7 +236,7 @@ int main (void)
         INITIAL_COUNTER_VALUE
         };
 
-    scroll_text("PONG ");
+    scroll_text("PONG: PUSH TO START ");
 
     while (1) {
         pacer_wait();
