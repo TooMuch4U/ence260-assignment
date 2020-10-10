@@ -5,6 +5,7 @@
  * last edited 10 October 2020 by Emma Hogan
  */
 
+
 #include "system.h"
 #include "pacer.h"
 #include "ball.h"
@@ -138,6 +139,7 @@ static void run_paddle_only (Ball* ball, Paddle* paddle, Game* game, uint8_t bit
     }
 }
 
+
 /** for debugging purposes */
 static void blue_led (void)
 {
@@ -151,6 +153,7 @@ static void blue_led (void)
         PORTC |= (1 << 2);
     }
 }
+
 
 /** Run the game logic during a round - ball and paddle movement, waiting for a game loss event:
     @param paddle a pointer to the paddle object
@@ -192,6 +195,7 @@ static void play_round (Paddle* paddle, Ball* ball, Game* game, uint8_t bitmap[]
         }
     }
 }
+
 
 /** Display the updated score for some amount of time and then update game state to
     keep playing or move to a win/loss screen if relevant:
